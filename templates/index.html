@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h1 class="display-4 text-primary">Servicentro Corazon de Jesus</h1>
+        <p class="lead">Aqui ponemos algo</p>
+        <img src="" class="img-fluid rounded" alt="Aqui podemos poner una imagen del Servicentro">
+        <a href="{{ url_for('about') }}" class="btn btn-success mt-4">Más sobre nosotros</a>
+    </div>
+{% endblock %}
