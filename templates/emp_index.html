@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Empleados{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Gestión de Empleados</h2>
+        <p>Seleccione una opción para gestionar los empleados:</p>
+        <div class="btn-group-vertical" role="group" aria-label="Gestión de Empleados">
+            <a href="{{ url_for('detalles_empleado') }}" class="btn btn-primary">Gestión de Empleados</a>
+            <a href="{{ url_for('solicitar_vacaciones') }}" class="btn btn-primary">Solicitar Vacaciones</a>
+            <a href="{{ url_for('ver_solicitudes') }}" class="btn btn-primary">Ver Solicitudes</a>
+            <a href="{{ url_for('calcular_nomina') }}" class="btn btn-primary">Calcular Nómina</a>
+            <a href="{{ url_for('evaluar_desempeno') }}" class="btn btn-primary">Evaluar Desempeño</a>
+            <a href="{{ url_for('registrar_ventas') }}" class="btn btn-primary">Registrar Ventas</a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Actualizar Ventas{% endblock %}
+
+{% block content %}
+    <h1>Actualizar Ventas Mensuales</h1>
+    <form action="{{ url_for('actualizar_ventas', id=id) }}" method="post">
+        <div class="form-group">
+            <label for="ventas">Ventas:</label>
+            <input type="number" id="ventas" name="ventas" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Actualizar Ventas</button>
+    </form>
+    {% if mensaje %}
+        <div class="alert alert-success mt-3">{{ mensaje }}</div>
+    {% endif %}
+{% endblock %}

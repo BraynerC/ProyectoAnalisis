@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Error en Cálculo de Nómina{% endblock %}
+
+{% block content %}
+    <h1>Error en el Cálculo de Nómina</h1>
+    <p>El sistema experimentó un error durante el cálculo de la nómina. Por favor, revise los datos ingresados e intente de nuevo.</p>
+    <a href="{{ url_for('calcular_nomina') }}" class="btn btn-primary">Volver a Intentar</a>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Informe de Nómina{% endblock %}
+
+{% block content %}
+    <h1>Informe de Nómina en PDF</h1>
+    <!-- Enlace descarga -->
+    <a href="{{ url_for('static', filename='nomina.pdf') }}" class="btn btn-primary">Descargar PDF</a>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Error en Evaluación{% endblock %}
+
+{% block content %}
+    <h1>Error en la Evaluación de Desempeño</h1>
+    <p>El sistema experimentó un error al intentar guardar la evaluación de desempeño. Por favor intente de nuevo.</p>
+    <a href="{{ url_for('evaluar_desempeno') }}" class="btn btn-primary">Volver a Intentar</a>
+{% endblock %}

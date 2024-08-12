@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block title %}Revisión de Nómina{% endblock %}
+
+{% block content %}
+    <h1>Revisión de Nómina</h1>
+    <a href="{{ url_for('revision_nomina_pdf') }}" class="btn btn-info">Ver Informe PDF</a>
+{% endblock %}

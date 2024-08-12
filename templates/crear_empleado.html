@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Añadir Empleado{% endblock %}
+
+{% block content %}
+    <h1>Añadir Empleado</h1>
+    <form action="{{ url_for('crear_empleado') }}" method="post">
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="puesto">Puesto:</label>
+            <input type="text" id="puesto" name="puesto" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Revisar Solicitud de Vacaciones{% endblock %}
+
+{% block content %}
+    <h1>Revisar Solicitud de Vacaciones</h1>
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Empleado</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Fin</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Camila Luna</td>
+                    <td>2024-09-01</td>
+                    <td>2024-09-15</td>
+                    <td>En espera</td>
+                    <td>
+                        <button type="button" class="btn btn-success" onclick="alert('Solicitud aprobada exitosamente')">Aprobar</button>
+                        <button type="button" class="btn btn-danger" onclick="alert('Solicitud rechazada exitosamente')">Rechazar</button>
+                        <a href="{{ url_for('ver_solicitudes') }}" class="btn btn-secondary">Volver a la Lista</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

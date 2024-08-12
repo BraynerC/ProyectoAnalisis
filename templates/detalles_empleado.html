@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Gestión de Empleados{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Lista de Empleados</h2>
+        <a href="{{ url_for('crear_empleado') }}" class="btn btn-primary">Crear Empleado</a>
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Puesto</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Camila Luna</td>
+                    <td>Desarrollador</td>
+                    <td>cluna20908@ufide.ac.cr</td>
+                    <td>
+                        <a href="{{ url_for('editar_empleado', id=1) }}" class="btn btn-warning btn-sm">Editar</a>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(1)">Eliminar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

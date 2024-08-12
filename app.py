@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
@@ -42,9 +42,93 @@ def incidencias():
 def autentificacion():
     return render_template('autentificacion.html')
 
+# EMP
+
+@app.route('/EMP')
+def EMP():
+    return render_template('emp_index.html')
+
 @app.route('/empleados')
 def empleados():
     return render_template('empleados.html')
+
+@app.route('/empleados/solicitar_vacaciones')
+def solicitar_vacaciones():
+    return render_template('solicitar_vacaciones.html')
+
+@app.route('/empleados/ver_solicitudes')
+def ver_solicitudes():
+    return render_template('ver_solicitudes.html')
+
+@app.route('/empleados/revisar_solicitud')
+def revisar_solicitud():
+    return render_template('revisar_solicitud.html')
+
+
+@app.route('/empleados/crear_empleado')
+def crear_empleado():
+    return render_template('crear_empleado.html')
+
+@app.route('/empleados/detalles_empleado')
+def detalles_empleado():
+    return render_template('detalles_empleado.html')
+
+@app.route('/empleados/editar_empleado')
+def editar_empleado():
+    return render_template('editar_empleado.html')
+
+
+@app.route('/empleados/calcular_nomina')
+def calcular_nomina():
+    return render_template('calcular_nomina.html')
+
+@app.route('/empleados/revision_nomina')
+def revision_nomina():
+    return render_template('revision_nomina.html')
+
+@app.route('/empleados/revision_nomina/pdf')
+def revision_nomina_pdf():
+    return render_template('revision_nomina_pdf.html')
+
+@app.route('/empleados/error_calculo_nomina')
+def error_calculo_nomina():
+    return render_template('error_calculo_nomina.html')
+
+@app.route('/empleados/evaluar_desempeno', methods=['GET', 'POST'])
+def evaluar_desempeno():
+    if request.method == 'POST':
+        return render_template('evaluar_desempeno.html', mensaje='Evaluación de desempeño completada exitosamente.')
+    return render_template('evaluar_desempeno.html')
+
+@app.route('/empleados/resultado_evaluacion')
+def resultado_evaluacion():
+    return render_template('resultado_evaluacion.html')
+
+@app.route('/empleados/error_evaluacion')
+def error_evaluacion():
+    return render_template('error_evaluacion.html')
+
+
+@app.route('/empleados/registrar_ventas')
+def registrar_ventas():
+    return render_template('registrar_ventas.html')
+
+
+@app.route('/empleados/consultar_ventas')
+def consultar_ventas():
+    return render_template('consultar_ventas.html')
+
+
+@app.route('/empleados/actualizar_ventas')
+def actualizar_ventas():
+    return render_template('actualizar_ventas.html')
+
+
+###############################################################
+
+
+
+
 
 @app.route('/servicios')
 def servicios():
@@ -72,3 +156,4 @@ def configurar_alertas():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    

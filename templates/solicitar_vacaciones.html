@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Solicitar Vacaciones{% endblock %}
+
+{% block content %}
+    <h1>Solicitar Vacaciones</h1>
+    <form action="{{ url_for('solicitar_vacaciones') }}" method="post">
+        <div class="form-group">
+            <label for="fecha_inicio">Fecha de Inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="fecha_fin">Fecha de Fin:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+    </form>
+{% endblock %}
