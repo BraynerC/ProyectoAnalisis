@@ -14,9 +14,37 @@ def about():
 def contact():
     return render_template('contact.html')
 
-@app.route('/redirect-home')
-def redirect_home():
-    return redirect(url_for('home'))
+@app.route('/reabastecimiento')
+def reabastecimiento():
+    return render_template('reabastecimiento.html')
+
+@app.route('/autenticacion')
+def autentificacion():
+    return render_template('autentificacion.html')
+
+@app.route('/empleados')
+def empleados():
+    return render_template('empleados.html')
+
+@app.route('/servicios')
+def servicios():
+    return render_template('servicios.html')
+
+@app.route('/tienda')
+def tienda():
+    return render_template('tienda.html')
+
+@app.route('/ventas')
+def ventas():
+    return render_template('ventas.html')
+
+@app.route('/mantenimiento')
+def mantenimiento():
+    return render_template('mantenimiento.html')
+
+@app.route('/emisiones')
+def emisiones():
+    return render_template('emisiones.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

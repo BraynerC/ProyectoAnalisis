@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Servicentro Corazon de Jesus{% endblock %}</title>
+    <title>{% block title %}Servicentro Corazón de Jesús{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('home') }}">Servicentro Corazon de Jesus</a>
-        <div class="collapse navbar-collapse">
+        <a class="navbar-brand" href="{{ url_for('home') }}">Servicentro Corazón de Jesús</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('home') }}">Home</a>
@@ -21,11 +24,29 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('contact') }}">Contáctanos</a>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="modulesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Módulos
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="modulesDropdown">
+                        <a class="dropdown-item" href="{{ url_for('autentificacion') }}">Autentificacion</a>
+                        <a class="dropdown-item" href="{{ url_for('reabastecimiento') }}">Reabastecimiento Automatizado</a>
+                        <a class="dropdown-item" href="{{ url_for('empleados') }}">Gestión de Empleados</a>
+                        <a class="dropdown-item" href="{{ url_for('servicios') }}">Servicios Adicionales</a>
+                        <a class="dropdown-item" href="{{ url_for('tienda') }}">Administración de Tienda</a>
+                        <a class="dropdown-item" href="{{ url_for('ventas') }}">Ventas</a>
+                        <a class="dropdown-item" href="{{ url_for('mantenimiento') }}">Mantenimiento Predictivo</a>
+                        <a class="dropdown-item" href="{{ url_for('emisiones') }}">Gestión de Emisiones</a>
+                    </div>
+                </li>
             </ul>
         </div>
     </nav>
     <div class="container mt-5">
         {% block content %}{% endblock %}
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
