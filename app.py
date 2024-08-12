@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
@@ -17,6 +17,26 @@ def contact():
 @app.route('/reabastecimiento')
 def reabastecimiento():
     return render_template('reabastecimiento.html')
+
+@app.route('/configurar_umbrales')
+def configurar_umbrales():
+    return render_template('configurar_umbrales.html')
+
+@app.route('/solicitud_reabastecimiento')
+def solicitud_reabastecimiento():
+    return render_template('solicitud_reabastecimiento.html')
+
+@app.route('/alertas_nivel_bajo')
+def alertas_nivel_bajo():
+    return render_template('alertas_nivel_bajo.html')
+
+@app.route('/registro_entregas')
+def registro_entregas():
+    return render_template('registro_entregas.html')
+
+@app.route('/incidencias')
+def incidencias():
+    return render_template('incidencias.html')
 
 @app.route('/autenticacion')
 def autentificacion():
@@ -45,6 +65,10 @@ def mantenimiento():
 @app.route('/emisiones')
 def emisiones():
     return render_template('emisiones.html')
+
+@app.route('/configurar_alertas')
+def configurar_alertas():
+    return render_template('configurar_alertas.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

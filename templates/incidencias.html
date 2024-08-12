@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes de Incidencias{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Registrar Incidencia</h2>
+        <form method="post" action="{{ url_for('registrar_incidencia') }}">
+            <div class="form-group">
+                <label for="tipo_incidencia">Tipo de Incidencia:</label>
+                <input type="text" id="tipo_incidencia" name="tipo_incidencia" class="form-control" placeholder="Ej: Calidad de Gasolina" required>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" class="form-control" rows="4" placeholder="Detalles de la incidencia" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar Incidencia</button>
+        </form>
+        <hr>
+        <h3>Incidencias Recientes</h3>
+        <div class="alert alert-danger" role="alert">
+            Incidencia registrada: Calidad de gasolina no cumple con los estándares.
+        </div>
+        <button class="btn btn-secondary">Generar Reporte</button>
+    </div>
+{% endblock %}

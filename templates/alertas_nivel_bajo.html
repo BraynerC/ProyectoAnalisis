@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Alertas de Nivel Bajo{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Configurar Alertas de Nivel Bajo</h2>
+        <form method="post" action="{{ url_for('configurar_alertas') }}">
+            <div class="form-group">
+                <label for="nivel_critico">Nivel Crítico (litros):</label>
+                <input type="number" id="nivel_critico" name="nivel_critico" class="form-control" placeholder="Ej: 6000" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Alertas</button>
+        </form>
+        <hr>
+        <h3>Alertas Recientes</h3>
+        <div class="alert alert-warning" role="alert">
+            Nivel de gasolina crítico detectado en el tanque 1: 5800 litros.
+        </div>
+        <button class="btn btn-success">Registrar Acción</button>
+        <button class="btn btn-danger">Marcar Alerta como Falsa</button>
+    </div>
+{% endblock %}

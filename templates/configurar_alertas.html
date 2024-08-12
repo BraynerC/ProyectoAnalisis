@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurar Alertas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Configurar Alertas de Nivel Bajo de Gasolina</h2>
+    <form>
+        <div class="form-group">
+            <label for="nivel_critico">Nivel Crítico (en litros):</label>
+            <input type="number" id="nivel_critico" name="nivel_critico" class="form-control" placeholder="Ingrese el nivel crítico" required>
+        </div>
+        <div class="form-group">
+            <label for="nivel_alerta">Nivel de Alerta (en litros):</label>
+            <input type="number" id="nivel_alerta" name="nivel_alerta" class="form-control" placeholder="Ingrese el nivel de alerta" required>
+        </div>
+        <button type="submit" class="btn btn-green">Guardar Configuración</button>
+    </form>
+</div>
+{% endblock %}

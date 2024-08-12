@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Solicitud de Reabastecimiento{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Solicitud de Reabastecimiento</h2>
+        <div class="alert alert-info" role="alert">
+            El sistema ha detectado que el nivel de gasolina es bajo. Se ha enviado una solicitud de reabastecimiento al proveedor.
+        </div>
+        <p>Detalles de la solicitud:</p>
+        <ul>
+            <li>Tipo de Combustible: Gasolina Regular</li>
+            <li>Cantidad Solicitada: 15000 litros</li>
+            <li>Estado: Enviado</li>
+        </ul>
+        <button class="btn btn-success">Confirmar Recepción</button>
+        <button class="btn btn-danger">Reportar Error</button>
+    </div>
+{% endblock %}

@@ -64,3 +64,65 @@ h1, h2, h3 {
     font-weight: 300;
     color: #ff8c00; 
 }
+
+.btn-custom {
+    background-color: #f0f0f0;
+    color: #ff6600;
+    border: 1px solid #ff6600;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.btn-custom:hover {
+    background-color: #ff6600;
+    color: #ffffff;
+    border-color: #ff6600;
+}
+
+.btn-custom:focus, .btn-custom:active {
+    box-shadow: none;
+}
+
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.btn-green {
+    background-color: #28a745;
+    color: #ffffff;
+    border: 1px solid #28a745;
+}
+
+.btn-green:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-yellow {
+    background-color: #ebb002;
+    color: #ffffff;
+    border: 1px solid #ebb002;
+}
+
+.btn-yellow:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+.btn-orange {
+    background-color: #fd7e14;
+    color: #ffffff;
+    border: 1px solid #fd7e14;
+}
+
+.btn-orange:hover {
+    background-color: #e7670f;
+    border-color: #e14a02;
+}
+
+
