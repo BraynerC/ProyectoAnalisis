@@ -57,6 +57,12 @@ def reset_password():
 def EMP():
     return render_template('emp_index.html')
 
+# EMP
+
+@app.route('/EMP')
+def EMP():
+    return render_template('emp_index.html')
+
 @app.route('/empleados')
 def empleados():
     return render_template('empleados.html')
@@ -134,7 +140,6 @@ def actualizar_ventas():
 
 
 ###############################################################
-
 
 @app.route('/servicios')
 def servicios():
