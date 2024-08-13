@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Solicitar Vacaciones{% endblock %}
-
+{% set show_navigation = true %}
 {% block content %}
     <h1>Solicitar Vacaciones</h1>
     <form action="{{ url_for('solicitar_vacaciones') }}" method="post">

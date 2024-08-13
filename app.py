@@ -57,12 +57,6 @@ def reset_password():
 def EMP():
     return render_template('emp_index.html')
 
-# EMP
-
-@app.route('/EMP')
-def EMP():
-    return render_template('emp_index.html')
-
 @app.route('/empleados/solicitar_vacaciones')
 def solicitar_vacaciones():
     return render_template('solicitar_vacaciones.html')
