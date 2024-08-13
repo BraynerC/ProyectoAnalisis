@@ -4,20 +4,51 @@
 
 {% block content %}
     <h1>Registro de Ventas Mensuales</h1>
-    <form action="{{ url_for('registrar_ventas') }}" method="post">
+
+    <form id="registroVentasForm">
         <div class="form-group">
             <label for="empleado">Empleado:</label>
             <input type="text" id="empleado" name="empleado" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="ventas">Ventas:</label>
+            <label for="ventas">Ventas (₡):</label>
             <input type="number" id="ventas" name="ventas" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="mes">Mes:</label>
+            <select id="mes" name="mes" class="form-control" required>
+                <option value="" disabled selected>Selecciona el mes</option>
+                <option value="Enero">Enero</option>
+                <option value="Febrero">Febrero</option>
+                <option value="Marzo">Marzo</option>
+                <option value="Abril">Abril</option>
+                <option value="Mayo">Mayo</option>
+                <option value="Junio">Junio</option>
+                <option value="Julio">Julio</option>
+                <option value="Agosto">Agosto</option>
+                <option value="Septiembre">Septiembre</option>
+                <option value="Octubre">Octubre</option>
+                <option value="Noviembre">Noviembre</option>
+                <option value="Diciembre">Diciembre</option>
+            </select>
         </div>
         <button type="submit" class="btn btn-primary">Guardar Ventas</button>
     </form>
-    {% if mensaje %}
-        <div class="alert alert-success mt-3">
-            {{ mensaje }}
-        </div>
-    {% endif %}
+
+    <div id="mensajeExito" class="alert alert-success mt-3" style="display: none;">
+        Ventas registradas exitosamente.
+    </div>
+
+    <script>
+        document.getElementById('registroVentasForm').addEventListener('submit', function(event) {
+
+            event.preventDefault();
+
+
+            document.getElementById('mensajeExito').style.display = 'block';
+
+
+            this.reset();
+        });
+    </script>
 {% endblock %}

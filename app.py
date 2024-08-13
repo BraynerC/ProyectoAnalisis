@@ -63,10 +63,6 @@ def EMP():
 def EMP():
     return render_template('emp_index.html')
 
-@app.route('/empleados')
-def empleados():
-    return render_template('empleados.html')
-
 @app.route('/empleados/solicitar_vacaciones')
 def solicitar_vacaciones():
     return render_template('solicitar_vacaciones.html')
@@ -101,10 +97,6 @@ def calcular_nomina():
 def revision_nomina():
     return render_template('revision_nomina.html')
 
-@app.route('/empleados/revision_nomina/pdf')
-def revision_nomina_pdf():
-    return render_template('revision_nomina_pdf.html')
-
 @app.route('/empleados/error_calculo_nomina')
 def error_calculo_nomina():
     return render_template('error_calculo_nomina.html')
@@ -118,6 +110,10 @@ def evaluar_desempeno():
 @app.route('/empleados/resultado_evaluacion')
 def resultado_evaluacion():
     return render_template('resultado_evaluacion.html')
+
+@app.route('/empleados/actualizar_evaluacion')
+def actualizar_evaluacion():
+    return render_template('actualizar_evaluacion.html')
 
 @app.route('/empleados/error_evaluacion')
 def error_evaluacion():
