@@ -1,8 +1,31 @@
 {% extends 'base.html' %}
-
-{% block title %}Mantenimiento Predictivo de Equipos{% endblock %}
-
+{% block title %}Módulo de Mantenimiento Predictivo{% endblock %}
+{% set show_navigation = true %}
 {% block content %}
-    <h1 class="text-primary">Mantenimiento Predictivo de Equipos</h1>
-    <p>Informacion del modulo</p>
+<div class="container mt-5">
+    <h2 class="text-center">Módulo de Mantenimiento Predictivo</h2>
+    <div class="row justify-content-center mt-4">
+        <!-- Funciones Técnicas -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>Funciones Técnicas</h3>
+                    <p>Accede a la configuración de parámetros, monitoreo continuo, y alertas de mantenimiento predictivo.</p>
+                    <a href="{{ url_for('technical_functions') }}" class="btn btn-primary btn-block">Ir a Funciones Técnicas</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funciones Administrativas -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>Funciones Administrativas</h3>
+                    <p>Accede a la generación de reportes, aprendizaje del sistema, y gestión de datos históricos.</p>
+                    <a href="{{ url_for('admin_functions_maintenance') }}" class="btn btn-secondary btn-block">Ir a Funciones Administrativas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

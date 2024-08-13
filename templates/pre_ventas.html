@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Módulo de Ventas{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Módulo de Ventas</h2>
+    <div class="row justify-content-center mt-4">
+        <!-- Funciones de Cajero -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>Funciones de Cajero</h3>
+                    <p>Accede a las funciones de ventas, aplicación de descuentos, verificación de edad y más.</p>
+                    <a href="{{ url_for('cashier_functions') }}" class="btn btn-primary btn-block">Ir a Funciones de Cajero</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funciones Administrativas -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>Funciones Administrativas</h3>
+                    <p>Accede a la generación de reportes, gestión de promociones, y configuración de métodos de pago.</p>
+                    <a href="{{ url_for('admin_functions') }}" class="btn btn-secondary btn-block">Ir a Funciones Administrativas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

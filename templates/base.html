@@ -10,6 +10,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="{{ url_for('home') }}">Servicentro Corazón de Jesús</a>
+        {% if show_navigation %}
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -29,18 +30,19 @@
                         Módulos
                     </a>
                     <div class="dropdown-menu" aria-labelledby="modulesDropdown">
-                        <a class="dropdown-item" href="{{ url_for('autentificacion') }}">Autentificacion</a>
+                        <a class="dropdown-item" href="{{ url_for('autenticacion') }}">Autenticación</a>
                         <a class="dropdown-item" href="{{ url_for('reabastecimiento') }}">Reabastecimiento Automatizado</a>
                         <a class="dropdown-item" href="{{ url_for('empleados') }}">Gestión de Empleados</a>
                         <a class="dropdown-item" href="{{ url_for('servicios') }}">Servicios Adicionales</a>
                         <a class="dropdown-item" href="{{ url_for('tienda') }}">Administración de Tienda</a>
-                        <a class="dropdown-item" href="{{ url_for('ventas') }}">Ventas</a>
+                        <a class="dropdown-item" href="{{ url_for('pre_ventas') }}">Ventas</a>
                         <a class="dropdown-item" href="{{ url_for('mantenimiento') }}">Mantenimiento Predictivo</a>
                         <a class="dropdown-item" href="{{ url_for('emisiones') }}">Gestión de Emisiones</a>
                     </div>
                 </li>
             </ul>
         </div>
+        {% endif %}
     </nav>
     <div class="container mt-5">
         {% block content %}{% endblock %}
