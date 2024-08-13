@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Funciones Técnicas{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Funciones Técnicas</h2>
+    
+    <!-- Configuración de Parámetros -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Configuración de Parámetros</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('configure_parameters') }}">
+                <div class="form-group">
+                    <label for="pressure-limit">Límite de Presión (PSI):</label>
+                    <input type="number" id="pressure-limit" name="pressure_limit" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="temperature-limit">Límite de Temperatura (°C):</label>
+                    <input type="number" id="temperature-limit" name="temperature_limit" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="fuel-level-limit">Límite de Nivel de Combustible (Litros):</label>
+                    <input type="number" id="fuel-level-limit" name="fuel_level_limit" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Parámetros</button>
+            </form>
+            <div id="parameters-messages" class="mt-3">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Monitoreo Continuo -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Monitoreo Continuo</h3>
+        </div>
+        <div class="card-body">
+            <p>El sistema está monitoreando continuamente los tanques de gasolina.</p>
+            <p>Última actualización: <span id="last-update">12/Aug/2024 10:00 AM</span></p>
+            <button class="btn btn-danger" onclick="manualCheck()">Realizar Verificación Manual</button>
+            <div id="monitoring-messages" class="mt-3">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

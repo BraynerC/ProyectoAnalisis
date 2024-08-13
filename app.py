@@ -50,6 +50,14 @@ def register():
 def reset_password():
     return render_template('reset_password.html')
 
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/reset_password')
+def reset_password():
+    return render_template('reset_password.html')
+
 # EMP
 
 @app.route('/EMP')
@@ -138,22 +146,18 @@ def servicios():
 def tienda():
     return render_template('tienda.html')
 
-# Ruta para procesar la venta
 @app.route('/process_sale')
 def process_sale():
     return render_template('ventas')
 
-# Ruta para generar reportes
 @app.route('/generate_report')
 def generate_report():
     return render_template('ventas')
 
-# Ruta para configurar promociones
 @app.route('/configure_promotion')
 def configure_promotion():
     return render_template('ventas')
 
-# Ruta para configurar métodos de pago
 @app.route('/configure_payment_method')
 def configure_payment_method():
     return render_template('ventas')
@@ -173,6 +177,26 @@ def admin_functions():
 @app.route('/mantenimiento')
 def mantenimiento():
     return render_template('mantenimiento.html')
+
+@app.route('/technical_functions')
+def technical_functions():
+    return render_template('technical_functions.html')
+
+@app.route('/admin_functions_maintenance')
+def admin_functions_maintenance():
+    return render_template('admin_functions_maintenance.html')
+
+@app.route('/configure_parameters')
+def configure_parameters():
+    return render_template('technical_functions')
+
+@app.route('/generate_maintenance_report')
+def generate_maintenance_report():
+    return render_template('admin_functions_maintenance')
+
+@app.route('/train_system')
+def train_system():
+    return render_template('admin_functions_maintenance')
 
 @app.route('/emisiones')
 def emisiones():
