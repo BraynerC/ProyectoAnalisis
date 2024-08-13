@@ -30,7 +30,7 @@
                     <option value="excel">Excel</option>
                 </select>
             </div>
-            <button type="button" class="btn btn-green" onclick="generarReporte()">Generar Reporte</button>
+            <button type="button" class="btn btn-green">Generar Reporte</button>
         </form>
 
         <div id="mensajeExito" class="alert alert-success mt-3" style="display: none;">
@@ -42,61 +42,4 @@
             <a href="#" id="descargarExcel" class="btn btn-secondary">Descargar Excel</a>
         </div>
     </div>
-
-    <script>
-        function generarReporte() {
-            const mes = document.getElementById('mes').value;
-            const formato = document.getElementById('formato').value;
-
-            if (!mes || !formato) {
-                alert('Por favor seleccione un mes y un formato.');
-                return;
-            }
-
-            document.getElementById('mensajeExito').style.display = 'block';
-            document.getElementById('reporte-links').style.display = 'block';
-
-            document.getElementById('descargarPDF').addEventListener('click', function(event) {
-                event.preventDefault();
-                const pdfContent = `
-                    <html>
-                    <head><title>Reporte Financiero</title></head>
-                    <body>
-                        <h1>Reporte Financiero de ${mes}</h1>
-                        <p>Test</p>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([pdfContent], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `reporte_financiero_${mes}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-
-            document.getElementById('descargarExcel').addEventListener('click', function(event) {
-                event.preventDefault();
-                const excelContent = `
-                    <html>
-                    <head><title>Reporte Financiero</title></head>
-                    <body>
-                        <h1>Reporte Financiero de ${mes}</h1>
-                        <p>Test</p>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([excelContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `reporte_financiero_${mes}.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-    </script>
 {% endblock %}

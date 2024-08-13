@@ -6,15 +6,7 @@
     <div class="container">
         <h2>Crear Nueva Promoción</h2>
 
-        {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-
-        {% if success %}
-            <div class="alert alert-success">{{ success }}</div>
-        {% endif %}
-
-        <form method="POST" action="{{ url_for('crear_promocion') }}">
+        <form>
             <div class="form-group">
                 <label for="nombre_promocion">Nombre de la Promoción:</label>
                 <input type="text" id="nombre_promocion" name="nombre_promocion" class="form-control" required>

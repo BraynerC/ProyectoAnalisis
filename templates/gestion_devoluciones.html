@@ -5,7 +5,7 @@
 {% block content %}
     <div class="container">
         <h2>Gestión de Devoluciones</h2>
-        <form method="POST" action="{{ url_for('gestion_devoluciones') }}">
+        <form method="get">
             <div class="form-group">
                 <label for="producto">Producto</label>
                 <input type="text" class="form-control" id="producto" name="producto" required>
@@ -27,58 +27,7 @@
         </form>
 
         <div class="mt-3" id="reporte-links">
-            <button type="button" class="btn btn-secondary" onclick="generarReporte()">Generar Reporte de Devoluciones</button>
-            <div id="mensajeExito" class="alert alert-success mt-3" style="display: none;">
-                Reporte generado exitosamente.
-            </div>
+            <button type="button" class="btn btn-secondary" disabled>Generar Reporte de Devoluciones</button>
         </div>
     </div>
-
-    <script>
-        function generarReporte() {
-            document.getElementById('mensajeExito').style.display = 'block';
-
-            document.getElementById('descargarPDF').addEventListener('click', function(event) {
-                event.preventDefault();
-                var pdfContent = `
-                    <html>
-                    <head><title>Reporte de Devoluciones</title></head>
-                    <body>
-                        <h1>Reporte de Devoluciones</h1>
-                        <p>Detalles de las devoluciones.</p>
-                    </body>
-                    </html>
-                `;
-                var blob = new Blob([pdfContent], { type: 'application/pdf' });
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'reporte_devoluciones.pdf';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-
-            document.getElementById('descargarExcel').addEventListener('click', function(event) {
-                event.preventDefault();
-                var excelContent = `
-                    <html>
-                    <head><title>Reporte de Devoluciones</title></head>
-                    <body>
-                        <h1>Reporte de Devoluciones</h1>
-                        <p>Detalles de las devoluciones.</p>
-                    </body>
-                    </html>
-                `;
-                var blob = new Blob([excelContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'reporte_devoluciones.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-    </script>
 {% endblock %}
