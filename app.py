@@ -38,7 +38,6 @@ def registro_entregas():
 def incidencias():
     return render_template('incidencias.html')
 
-
 @app.route('/')
 def autenticacion():
     return render_template('autenticacion.html')
@@ -139,9 +138,37 @@ def servicios():
 def tienda():
     return render_template('tienda.html')
 
-@app.route('/ventas')
-def ventas():
-    return render_template('ventas.html')
+# Ruta para procesar la venta
+@app.route('/process_sale')
+def process_sale():
+    return render_template('ventas')
+
+# Ruta para generar reportes
+@app.route('/generate_report')
+def generate_report():
+    return render_template('ventas')
+
+# Ruta para configurar promociones
+@app.route('/configure_promotion')
+def configure_promotion():
+    return render_template('ventas')
+
+# Ruta para configurar métodos de pago
+@app.route('/configure_payment_method')
+def configure_payment_method():
+    return render_template('ventas')
+
+@app.route('/pre_ventas')
+def pre_ventas():
+    return render_template('pre_ventas.html')
+
+@app.route('/cashier_functions')
+def cashier_functions():
+    return render_template('cashier_functions.html')
+
+@app.route('/admin_functions')
+def admin_functions():
+    return render_template('admin_functions.html')
 
 @app.route('/mantenimiento')
 def mantenimiento():

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Módulo de Ventas{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Funciones Administrativas
+    </h2>
+
+     <!-- Sección de Reportes -->
+     <div class="card mt-4">
+        <div class="card-header">
+            <h3>Generar Reportes de Ventas</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('generate_report') }}">
+                <div class="form-group">
+                    <label for="report-type">Tipo de Reporte:</label>
+                    <select id="report-type" name="report_type" class="form-control" required>
+                        <option value="daily">Diario</option>
+                        <option value="monthly">Mensual</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">Generar Reporte</button>
+            </form>
+            <div id="report-messages" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Sección de Gestión de Métodos de Pago -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Configurar Métodos de Pago</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('configure_payment_method') }}">
+                <div class="form-group">
+                    <label for="payment-method">Método de Pago:</label>
+                    <input type="text" id="payment-method" name="payment_method" class="form-control" placeholder="Ej: Pagos Móviles" required>
+                </div>
+                <button type="submit" class="btn btn-warning">Añadir Método de Pago</button>
+            </form>
+            <div id="payment-messages" class="mt-3"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
