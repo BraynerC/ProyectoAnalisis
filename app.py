@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/index')
 def home():
     return render_template('index.html')
 
@@ -38,9 +38,18 @@ def registro_entregas():
 def incidencias():
     return render_template('incidencias.html')
 
-@app.route('/autenticacion')
-def autentificacion():
-    return render_template('autentificacion.html')
+
+@app.route('/')
+def autenticacion():
+    return render_template('autenticacion.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/reset_password')
+def reset_password():
+    return render_template('reset_password.html')
 
 # EMP
 
