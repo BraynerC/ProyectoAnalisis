@@ -50,14 +50,6 @@ def register():
 def reset_password():
     return render_template('reset_password.html')
 
-@app.route('/register')
-def register():
-    return render_template('register.html')
-
-@app.route('/reset_password')
-def reset_password():
-    return render_template('reset_password.html')
-
 # EMP
 
 @app.route('/EMP')
@@ -241,6 +233,10 @@ def emisiones():
 @app.route('/configurar_alertas')
 def configurar_alertas():
     return render_template('configurar_alertas.html')
+
+@app.route('/ventas')
+def ventas():
+    return render_template('ventas.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
