@@ -127,9 +127,6 @@ def actualizar_ventas():
 ###############################################################
 
 
-
-
-
 @app.route('/servicios')
 def servicios():
     return render_template('servicios.html')

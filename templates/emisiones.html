@@ -1,8 +1,68 @@
 {% extends 'base.html' %}
 
-{% block title %}Gestión de Emisiones y Cumplimiento Ambiental{% endblock %}
+{% block title %}Gestión de Emisiones{% endblock %}
 
 {% block content %}
-    <h1 class="text-primary">Gestión de Emisiones y Cumplimiento Ambiental</h1>
-    <p>Informacion del modulo</p>
+<div class="container">
+    <h2>Gestión de Emisiones</h2>
+
+    <section id="configuracion">
+        <h3>Configuración de Sensores de Emisión</h3>
+        <form method="post" action="/emisiones/configuracion">
+            <div class="form-group">
+                <label for="umbral_emision">Umbral de Emisión:</label>
+                <input type="text" id="umbral_emision" name="umbral_emision" class="form-control" placeholder="Ingrese el umbral de emisión" required>
+            </div>
+            <button type="submit" class="btn btn-green">Guardar Configuración</button>
+        </form>
+    </section>
+
+    <section id="alertas" class="mt-5">
+        <h3>Alertas de Emisión</h3>
+        <form method="post" action="/emisiones/alertas">
+            <div class="form-group">
+                <label for="alerta_emision">Detalles de la Alerta:</label>
+                <input type="text" id="alerta_emision" name="alerta_emision" class="form-control" placeholder="Ingrese los detalles de la alerta" required>
+            </div>
+            <button type="submit" class="btn btn-yellow">Guardar Alerta</button>
+        </form>
+    </section>
+
+    <section id="reportes" class="mt-5">
+        <h3>Reportes de Emisiones</h3>
+        <form method="post" action="/emisiones/reportes">
+            <div class="form-group">
+                <label for="periodo_reporte">Período de Reporte:</label>
+                <input type="text" id="periodo_reporte" name="periodo_reporte" class="form-control" placeholder="Ingrese el período de reporte" required>
+            </div>
+            <div class="form-group">
+                <label for="campos_personalizados">Campos Personalizados:</label>
+                <input type="text" id="campos_personalizados" name="campos_personalizados" class="form-control" placeholder="Ingrese campos personalizados" required>
+            </div>
+            <button type="submit" class="btn btn-orange">Generar Reporte</button>
+        </form>
+    </section>
+
+    <section id="tendencias" class="mt-5">
+        <h3>Informe de Tendencias</h3>
+        <form method="post" action="/emisiones/tendencias">
+            <div class="form-group">
+                <label for="periodo_tendencias">Período para Tendencias:</label>
+                <input type="text" id="periodo_tendencias" name="periodo_tendencias" class="form-control" placeholder="Ingrese el período para tendencias" required>
+            </div>
+            <button type="submit" class="btn btn-orange">Generar Informe</button>
+        </form>
+    </section>
+
+    <section id="integracion" class="mt-5">
+        <h3>Configuración de Integración</h3>
+        <form method="post" action="/emisiones/integracion">
+            <div class="form-group">
+                <label for="datos_integracion">Datos de Integración:</label>
+                <input type="text" id="datos_integracion" name="datos_integracion" class="form-control" placeholder="Ingrese los datos de integración" required>
+            </div>
+            <button type="submit" class="btn btn-green">Configurar Integración</button>
+        </form>
+    </section>
+</div>
 {% endblock %}
