@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__)
+app.secret_key = 'f6d7d98e9a2b7f4a35f4b5e7d6a7c8e9'
 
 @app.route('/')
 def home():
@@ -60,7 +61,6 @@ def ver_solicitudes():
 def revisar_solicitud():
     return render_template('revisar_solicitud.html')
 
-
 @app.route('/empleados/crear_empleado')
 def crear_empleado():
     return render_template('crear_empleado.html')
@@ -72,7 +72,6 @@ def detalles_empleado():
 @app.route('/empleados/editar_empleado')
 def editar_empleado():
     return render_template('editar_empleado.html')
-
 
 @app.route('/empleados/calcular_nomina')
 def calcular_nomina():
@@ -104,35 +103,173 @@ def actualizar_evaluacion():
 def error_evaluacion():
     return render_template('error_evaluacion.html')
 
-
 @app.route('/empleados/registrar_ventas')
 def registrar_ventas():
     return render_template('registrar_ventas.html')
-
 
 @app.route('/empleados/consultar_ventas')
 def consultar_ventas():
     return render_template('consultar_ventas.html')
 
-
 @app.route('/empleados/actualizar_ventas')
 def actualizar_ventas():
     return render_template('actualizar_ventas.html')
 
+# ADT
 
-###############################################################
+@app.route('/tienda/gestion_inventario')
+def gestion_inventario():
+    return render_template('gestion_inventario.html')
+
+@app.route('/tienda/gestion_proveedores')
+def gestion_proveedores():
+    return render_template('gestion_proveedores.html')
+
+@app.route('/tienda/gestion_promociones')
+def gestion_promociones():
+    return render_template('gestion_promociones.html')
+
+@app.route('/tienda/reportes_financieros', methods=['GET', 'POST'])
+def reportes_financieros():
+    if request.method == 'POST':
+        mes = request.form.get('mes')
+        formato = request.form.get('formato')
+
+        if not mes or not formato:
+            flash('Por favor seleccione un mes y un formato.', 'error')
+            return redirect(url_for('reportes_financieros'))
+
+        flash('Reporte generado exitosamente.', 'success')
+        return redirect(url_for('reportes_financieros'))
+
+    return render_template('reportes_financieros.html')
+
+@app.route('/tienda/gestion_productos')
+def gestion_productos():
+    return render_template('gestion_productos.html')
+
+@app.route('/tienda/registro_producto', methods=['GET', 'POST'])
+def registro_producto():
+    if request.method == 'POST':
+        nombre_producto = request.form.get('nombre_producto')
+        cantidad = request.form.get('cantidad')
+        precio = request.form.get('precio')
+
+        if not nombre_producto or not cantidad or not precio:
+            error = "Todos los campos son obligatorios."
+            return render_template('registro_producto.html', error=error)
+
+        success = "Producto registrado exitosamente."
+        return render_template('registro_producto.html', success=success)
+
+    return render_template('registro_producto.html')
+
+@app.route('/tienda/registro_proveedor', methods=['GET', 'POST'])
+def registro_proveedor():
+    if request.method == 'POST':
+        nombre_proveedor = request.form.get('nombre_proveedor')
+        contacto = request.form.get('contacto')
+        productos_suministrados = request.form.get('productos_suministrados')
+
+        proveedor_existente = False  
+
+        if proveedor_existente:
+            error = "Error: el proveedor ya está registrado."
+            return render_template('registro_proveedor.html', error=error)
+
+        if not nombre_proveedor or not contacto or not productos_suministrados:
+            error = "Todos los campos son obligatorios."
+            return render_template('registro_proveedor.html', error=error)
+
+        success = "Proveedor registrado exitosamente."
+        return render_template('registro_proveedor.html', success=success)
+
+    return render_template('registro_proveedor.html')
+
+@app.route('/tienda/crear_promocion', methods=['GET', 'POST'])
+def crear_promocion():
+    if request.method == 'POST':
+        nombre_promocion = request.form.get('nombre_promocion')
+        producto = request.form.get('producto')
+        fecha_inicio = request.form.get('fecha_inicio')
+        fecha_fin = request.form.get('fecha_fin')
+        descuento = request.form.get('descuento')
+
+        if fecha_inicio > fecha_fin:
+            error = "Error: Las fechas de la promoción son inválidas."
+            return render_template('crear_promocion.html', error=error)
+
+        error_de_servidor = False  
+
+        if error_de_servidor:
+            error = "Error del servidor. Por favor, inténtelo de nuevo más tarde."
+            return render_template('crear_promocion.html', error=error)
+
+        success = "Promoción creada exitosamente."
+        return render_template('crear_promocion.html', success=success)
+
+    return render_template('crear_promocion.html')
+
+@app.route('/tienda/actualizar_precio_producto', methods=['GET', 'POST'])
+def actualizar_precio_producto():
+    if request.method == 'POST':
+        nombre_producto = request.form.get('nombre_producto')
+        nuevo_precio = request.form.get('nuevo_precio')
+
+        if not nombre_producto or not nuevo_precio:
+            error = "Todos los campos son obligatorios."
+            return render_template('actualizar_precio_producto.html', error=error)
+
+        try:
+            nuevo_precio = float(nuevo_precio)
+            if nuevo_precio < 0:
+                raise ValueError("El precio no puede ser negativo.")
+        except ValueError as e:
+            error = f"Error: Precio inválido. {str(e)}"
+            return render_template('actualizar_precio_producto.html', error=error)
+
+        success = "Precio actualizado exitosamente."
+        return render_template('actualizar_precio_producto.html', success=success)
+
+    return render_template('actualizar_precio_producto.html')
+
+@app.route('/tienda/gestion_devoluciones', methods=['GET', 'POST'])
+def gestion_devoluciones():
+    if request.method == 'POST':
+        producto = request.form.get('producto')
+        motivo = request.form.get('motivo')
+        cantidad = request.form.get('cantidad')
+
+        if not producto or not motivo or not cantidad:
+            flash('Todos los campos son obligatorios.', 'error')
+            return redirect(url_for('gestion_devoluciones'))
+
+        razones_validas = ["Producto defectuoso", "Fecha de caducidad cercana", "Otro"]
+        if motivo not in razones_validas:
+            flash('Error: Razón de devolución no válida', 'error')
+            return redirect(url_for('gestion_devoluciones'))
 
 
+        try:
 
+            flash('Devolución registrada exitosamente.', 'success')
+        except:
+            flash('Error del servidor. Por favor, inténtelo de nuevo más tarde.', 'error')
+        
+        return redirect(url_for('gestion_devoluciones'))
+
+    return render_template('gestion_devoluciones.html')
+
+##################################
 
 
 @app.route('/servicios')
 def servicios():
     return render_template('servicios.html')
 
-@app.route('/tienda')
-def tienda():
-    return render_template('tienda.html')
+@app.route('/ADT')
+def ADT():
+    return render_template('adt_index.html')
 
 @app.route('/ventas')
 def ventas():
@@ -152,4 +289,3 @@ def configurar_alertas():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    

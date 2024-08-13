@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Proveedores{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Gestión de Proveedores</h2>
+        <p>Seleccione una opción para gestionar los proveedores:</p>
+
+        <div class="btn-group-vertical" role="group" aria-label="Gestión de Proveedores">
+            <a href="{{ url_for('registro_proveedor') }}" class="btn btn-green">Registrar Nuevo Proveedor</a>
+            <button type="button" class="btn btn-orange" onclick="generarReporte()">Generar Reporte de Proveedores</button>
+        </div>
+
+        <div id="mensajeExito" class="alert alert-success mt-3" style="display: none;">
+            Reporte de proveedores generado exitosamente.
+        </div>
+
+        <div class="mt-3" id="reporte-links" style="display: none;">
+            <a href="#" id="descargarPDF" class="btn btn-secondary">Descargar PDF</a>
+            <a href="#" id="descargarExcel" class="btn btn-secondary">Descargar Excel</a>
+        </div>
+    </div>
+
+    <script>
+        function generarReporte() {
+            document.getElementById('mensajeExito').style.display = 'block';
+            document.getElementById('reporte-links').style.display = 'block';
+
+            document.getElementById('descargarPDF').addEventListener('click', function(event) {
+                event.preventDefault();
+                var pdfContent = `
+                    <html>
+                    <head><title>Reporte de Proveedores</title></head>
+                    <body>
+                        <h1>Reporte de Proveedores</h1>
+                        <p>Test</p>
+                    </body>
+                    </html>
+                `;
+                var blob = new Blob([pdfContent], { type: 'application/pdf' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'reporte_proveedores.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            document.getElementById('descargarExcel').addEventListener('click', function(event) {
+                event.preventDefault();
+                var excelContent = `
+                    <html>
+                    <head><title>Reporte de Proveedores</title></head>
+                    <body>
+                        <h1>Reporte de Proveedores</h1>
+                        <p>Test</p>
+                    </body>
+                    </html>
+                `;
+                var blob = new Blob([excelContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'reporte_proveedores.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+    </script>
+{% endblock %}

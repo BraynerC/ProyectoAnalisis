@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Promociones{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Gestión de Promociones</h2>
+        <p>Seleccione una opción para gestionar las promociones:</p>
+
+        <div class="btn-group-vertical" role="group" aria-label="Gestión de Promociones">
+            <a href="{{ url_for('crear_promocion') }}" class="btn btn-green">Crear Nueva Promoción</a>
+            <button type="button" class="btn btn-orange" onclick="generarReporte()">Generar Reporte de Promociones</button>
+        </div>
+
+        <div id="mensajeExito" class="alert alert-success mt-3" style="display: none;">
+            Reporte de promociones generado exitosamente.
+        </div>
+
+        <div class="mt-3" id="reporte-links" style="display: none;">
+            <a href="#" id="descargarPDF" class="btn btn-secondary">Descargar PDF</a>
+            <a href="#" id="descargarExcel" class="btn btn-secondary">Descargar Excel</a>
+        </div>
+    </div>
+
+    <script>
+        function generarReporte() {
+            document.getElementById('mensajeExito').style.display = 'block';
+            document.getElementById('reporte-links').style.display = 'block';
+
+            document.getElementById('descargarPDF').addEventListener('click', function(event) {
+                event.preventDefault();
+                var pdfContent = `
+                    <html>
+                    <head><title>Reporte de Promociones</title></head>
+                    <body>
+                        <h1>Reporte de Promociones</h1>
+                        <p>Este es un documento PDF de ejemplo para las promociones.</p>
+                    </body>
+                    </html>
+                `;
+                var blob = new Blob([pdfContent], { type: 'application/pdf' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'reporte_promociones.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            document.getElementById('descargarExcel').addEventListener('click', function(event) {
+                event.preventDefault();
+                var excelContent = `
+                    <html>
+                    <head><title>Reporte de Promociones</title></head>
+                    <body>
+                        <h1>Reporte de Promociones</h1>
+                        <p>Este es un documento Excel de ejemplo para las promociones.</p>
+                    </body>
+                    </html>
+                `;
+                var blob = new Blob([excelContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'reporte_promociones.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+    </script>
+{% endblock %}

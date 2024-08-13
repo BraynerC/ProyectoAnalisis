@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Actualizar Precio de Producto{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Actualizar Precio de Producto</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="nombre_producto">Nombre del Producto:</label>
+                <input type="text" name="nombre_producto" id="nombre_producto" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="nuevo_precio">Nuevo Precio:</label>
+                <input type="text" name="nuevo_precio" id="nuevo_precio" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizar Precio</button>
+        </form>
+        {% if success %}
+            <div class="alert alert-success mt-3">{{ success }}</div>
+        {% elif error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+        {% endif %}
+    </div>
+{% endblock %}
