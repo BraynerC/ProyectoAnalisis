@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro de Producto{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Registrar Nuevo Producto</h2>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        {% if success %}
+            <div class="alert alert-success">{{ success }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('registro_producto') }}">
+            <div class="form-group">
+                <label for="nombre_producto">Nombre del Producto:</label>
+                <input type="text" id="nombre_producto" name="nombre_producto" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="cantidad">Cantidad Disponible:</label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="precio">Precio del Producto:</label>
+                <input type="number" id="precio" name="precio" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar Producto</button>
+        </form>
+    </div>
+{% endblock %}

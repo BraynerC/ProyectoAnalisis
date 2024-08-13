@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template 
 
 app = Flask(__name__)
 
@@ -76,7 +76,6 @@ def ver_solicitudes():
 def revisar_solicitud():
     return render_template('revisar_solicitud.html')
 
-
 @app.route('/empleados/crear_empleado')
 def crear_empleado():
     return render_template('crear_empleado.html')
@@ -88,7 +87,6 @@ def detalles_empleado():
 @app.route('/empleados/editar_empleado')
 def editar_empleado():
     return render_template('editar_empleado.html')
-
 
 @app.route('/empleados/calcular_nomina')
 def calcular_nomina():
@@ -102,10 +100,8 @@ def revision_nomina():
 def error_calculo_nomina():
     return render_template('error_calculo_nomina.html')
 
-@app.route('/empleados/evaluar_desempeno', methods=['GET', 'POST'])
+@app.route('/empleados/evaluar_desempeno')
 def evaluar_desempeno():
-    if request.method == 'POST':
-        return render_template('evaluar_desempeno.html', mensaje='Evaluación de desempeño completada exitosamente.')
     return render_template('evaluar_desempeno.html')
 
 @app.route('/empleados/resultado_evaluacion')
@@ -120,31 +116,71 @@ def actualizar_evaluacion():
 def error_evaluacion():
     return render_template('error_evaluacion.html')
 
-
 @app.route('/empleados/registrar_ventas')
 def registrar_ventas():
     return render_template('registrar_ventas.html')
-
 
 @app.route('/empleados/consultar_ventas')
 def consultar_ventas():
     return render_template('consultar_ventas.html')
 
-
 @app.route('/empleados/actualizar_ventas')
 def actualizar_ventas():
     return render_template('actualizar_ventas.html')
 
+# ADT
 
-###############################################################
+@app.route('/tienda/gestion_inventario')
+def gestion_inventario():
+    return render_template('gestion_inventario.html')
+
+@app.route('/tienda/gestion_proveedores')
+def gestion_proveedores():
+    return render_template('gestion_proveedores.html')
+
+@app.route('/tienda/gestion_promociones')
+def gestion_promociones():
+    return render_template('gestion_promociones.html')
+
+@app.route('/tienda/reportes_financieros')
+def reportes_financieros():
+    return render_template('reportes_financieros.html')
+
+@app.route('/tienda/gestion_productos')
+def gestion_productos():
+    return render_template('gestion_productos.html')
+
+@app.route('/tienda/registro_producto')
+def registro_producto():
+    return render_template('registro_producto.html')
+
+
+@app.route('/tienda/registro_proveedor')
+def registro_proveedor():
+    return render_template('registro_proveedor.html')
+
+@app.route('/tienda/crear_promocion')
+def crear_promocion():
+    return render_template('crear_promocion.html')
+
+@app.route('/tienda/actualizar_precio_producto')
+def actualizar_precio_producto():
+    return render_template('actualizar_precio_producto.html')
+
+@app.route('/tienda/gestion_devoluciones')
+def gestion_devoluciones():
+    return render_template('gestion_devoluciones.html')
+
+##################################
+
 
 @app.route('/servicios')
 def servicios():
     return render_template('servicios.html')
 
-@app.route('/tienda')
-def tienda():
-    return render_template('tienda.html')
+@app.route('/ADT')
+def ADT():
+    return render_template('adt_index.html')
 
 @app.route('/process_sale')
 def process_sale():
@@ -208,4 +244,3 @@ def configurar_alertas():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    

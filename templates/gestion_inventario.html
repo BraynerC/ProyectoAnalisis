@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Inventario{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Gestión de Inventario</h2>
+        <p>Seleccione una opción para gestionar el inventario:</p>
+
+        <div class="btn-group-vertical" role="group" aria-label="Gestión de Inventario">
+            <a href="{{ url_for('registro_producto') }}" class="btn btn-green">Registrar Nuevo Producto</a>
+
+            <button type="button" class="btn btn-orange" disabled>Generar Reporte de Inventario</button>
+        </div>
+
+        <div class="mt-3" id="reporte-links" style="display: none;">
+
+            <a href="#" id="descargarPDF" class="btn btn-secondary" style="display: none;">Descargar PDF</a>
+            <a href="#" id="descargarExcel" class="btn btn-secondary" style="display: none;">Descargar Excel</a>
+        </div>
+    </div>
+{% endblock %}

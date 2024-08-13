@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Promociones{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Gestión de Promociones</h2>
+        <p>Seleccione una opción para gestionar las promociones:</p>
+
+        <div class="btn-group-vertical" role="group" aria-label="Gestión de Promociones">
+            <a href="{{ url_for('crear_promocion') }}" class="btn btn-green">Crear Nueva Promoción</a>
+            <button type="button" class="btn btn-orange" onclick="generarReporte()">Generar Reporte de Promociones</button>
+        </div>
+
+        <div id="mensajeExito" class="alert alert-success mt-3" style="display: none;">
+            Reporte de promociones generado exitosamente.
+        </div>
+
+        <div class="mt-3" id="reporte-links" style="display: none;">
+            <a href="#" id="descargarPDF" class="btn btn-secondary">Descargar PDF</a>
+            <a href="#" id="descargarExcel" class="btn btn-secondary">Descargar Excel</a>
+        </div>
+    </div>
+{% endblock %}

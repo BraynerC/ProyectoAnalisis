@@ -5,7 +5,7 @@
 {% block content %}
     <h1>Consultar Ventas Mensuales</h1>
 
-    <form id="consultarVentasForm">
+    <form>
         <div class="form-group">
             <label for="empleado">Empleado:</label>
             <input type="text" id="empleado" name="empleado" class="form-control" required>
@@ -19,7 +19,7 @@
                 <option value="Q4">Cuarto Cuatrimestre</option>
             </select>
         </div>
-        <button type="button" class="btn btn-primary" onclick="consultarVentas()">Consultar</button>
+        <button type="button" class="btn btn-primary">Consultar</button>
     </form>
 
     <a href="{{ url_for('registrar_ventas') }}" class="btn btn-orange mt-3">Registrar Ventas</a>
@@ -34,52 +34,7 @@
                 </tr>
             </thead>
             <tbody id="ventas-body">
-                <!-- Los datos de las ventas se llenarán aquí -->
             </tbody>
         </table>
     </div>
-
-    <script>
-        function consultarVentas() {
-            var periodo = document.getElementById('periodo').value;
-            var ventasTable = document.getElementById('ventas-table');
-            var ventasBody = document.getElementById('ventas-body');
-
-            var ventasDatos = {
-                'Q1': [
-                    { mes: 'Enero', ventas: '₡500,000' },
-                    { mes: 'Febrero', ventas: '₡450,000' },
-                    { mes: 'Marzo', ventas: '₡550,000' },
-                ],
-                'Q2': [
-                    { mes: 'Abril', ventas: '₡600,000' },
-                    { mes: 'Mayo', ventas: '₡620,000' },
-                    { mes: 'Junio', ventas: '₡630,000' },
-                ],
-                'Q3': [
-                    { mes: 'Julio', ventas: '₡700,000' },
-                    { mes: 'Agosto', ventas: '₡710,000' },
-                    { mes: 'Septiembre', ventas: '₡720,000' },
-                ],
-                'Q4': [
-                    { mes: 'Octubre', ventas: '₡750,000' },
-                    { mes: 'Noviembre', ventas: '₡760,000' },
-                    { mes: 'Diciembre', ventas: '₡770,000' },
-                ],
-            };
-
-            ventasBody.innerHTML = '';
-
-            if (ventasDatos[periodo]) {
-                ventasDatos[periodo].forEach(function(dato) {
-                    var row = document.createElement('tr');
-                    row.innerHTML = `<td>${dato.mes}</td><td>${dato.ventas}</td>`;
-                    ventasBody.appendChild(row);
-                });
-                ventasTable.style.display = 'block';
-            } else {
-                ventasTable.style.display = 'none';
-            }
-        }
-    </script>
 {% endblock %}
