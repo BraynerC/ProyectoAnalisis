@@ -10,7 +10,7 @@
             <h3>Generar Reportes de Mantenimiento Predictivo</h3>
         </div>
         <div class="card-body">
-            <form method="post" action="{{ url_for('generate_maintenance_report') }}">
+            <form>
                 <div class="form-group">
                     <label for="report-type">Tipo de Reporte:</label>
                     <select id="report-type" name="report_type" class="form-control" required>
@@ -29,7 +29,7 @@
             <h3>Entrenamiento del Sistema</h3>
         </div>
         <div class="card-body">
-            <form method="post" action="{{ url_for('train_system') }}">
+            <form>
                 <div class="form-group">
                     <label for="data-set">Seleccionar Conjunto de Datos:</label>
                     <input type="file" id="data-set" name="data_set" class="form-control" required>

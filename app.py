@@ -234,9 +234,6 @@ def emisiones():
 def configurar_alertas():
     return render_template('configurar_alertas.html')
 
-@app.route('/ventas')
-def ventas():
-    return render_template('ventas.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
