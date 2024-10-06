@@ -16,7 +16,7 @@ CREATE TABLE Empleados (
     telefono NVARCHAR(15),
     direccion NVARCHAR(255),
     fecha_contratacion DATE,
-    rol NVARCHAR(50) CHECK (rol IN ('Administrador', 'Gerente', 'Empleado de Ventas', 'Técnico de Servicios', 'Mantenimiento')),
+    rol NVARCHAR(50) CHECK (rol IN ('Administrador', 'Gerente', 'Empleado', 'Tecnico', 'Mantenimiento')),
     estatus NVARCHAR(10) DEFAULT 'Activo' CHECK (estatus IN ('Activo', 'Inactivo'))
 );
 
