@@ -1,6 +1,17 @@
-from flask import Flask, render_template 
-
+from flask import Flask, render_template, request, redirect, url_for, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+import pyodbc  # Librería para conectar a SQL Server
 app = Flask(__name__)
+app.secret_key = 'Hola'
+
+def get_db_connection():
+    connection = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'SERVER=localhost\SQLEXPRESS;'  # Cambia esto si tu instancia tiene otro nombre
+        'DATABASE=ServicentroCorazonDB;'
+         'Trusted_Connection=yes;' 
+    )
+    return connection
 
 @app.route('/index')
 def home():
@@ -38,12 +49,64 @@ def registro_entregas():
 def incidencias():
     return render_template('incidencias.html')
 
-@app.route('/')
+@app.route('/autenticacion', methods=['GET', 'POST'])
 def autenticacion():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Conectar a la base de datos SQL Server
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Verificar credenciales
+        cursor.execute('SELECT * FROM Usuarios WHERE nombre_usuario = ?', (username,))
+        user = cursor.fetchone()
+
+        if user and check_password_hash(user[2], password):  # user[2] es la columna de contraseña
+            flash('Inicio de sesión exitoso')
+            return redirect(url_for('home'))  # Redirige al home o dashboard
+        else:
+            flash('Nombre de usuario o contraseña incorrectos')
+            return redirect(url_for('autenticacion'))
+    
     return render_template('autenticacion.html')
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+
+        # Conectar a la base de datos SQL Server
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Verificar si el usuario ya existe
+        cursor.execute('SELECT * FROM Usuarios WHERE nombre_usuario = ?', (username,))
+        user = cursor.fetchone()
+
+        if user:
+            flash('El nombre de usuario ya está en uso')
+            return redirect(url_for('register'))
+
+        # Crear el hash de la contraseña
+        hashed_password = generate_password_hash(password)
+
+        # Insertar el nuevo usuario en la base de datos
+        try:
+            cursor.execute('''INSERT INTO Usuarios (nombre_usuario, contrasena, rol, estatus)
+                              VALUES (?, ?, 'Cliente', 'Activo')''', (username, hashed_password))
+            conn.commit()
+            flash('Usuario registrado exitosamente')
+            return redirect(url_for('autenticacion'))
+        except Exception as e:
+            flash(f'Error al registrar el usuario: {e}')
+            return redirect(url_for('register'))
+        finally:
+            conn.close()
+
     return render_template('register.html')
 
 @app.route('/reset_password')
