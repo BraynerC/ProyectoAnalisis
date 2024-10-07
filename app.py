@@ -4,6 +4,10 @@ import pyodbc  # Librería para conectar a SQL Server
 app = Flask(__name__)
 app.secret_key = 'Hola'
 
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
@@ -338,6 +342,9 @@ def gestion_devoluciones():
 
 ##################################
 
+@app.route('/emisiones')
+def emisiones():
+    return render_template('emisiones.html')
 
 @app.route('/servicios')
 def servicios():
@@ -399,9 +406,6 @@ def generate_maintenance_report():
 def train_system():
     return render_template('admin_functions_maintenance')
 
-@app.route('/emisiones')
-def emisiones():
-    return render_template('emisiones.html')
 
 @app.route('/configurar_alertas')
 def configurar_alertas():
