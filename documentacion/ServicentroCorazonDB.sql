@@ -25,7 +25,7 @@ CREATE TABLE Usuarios (
     nombre_usuario NVARCHAR(50) UNIQUE NOT NULL,
     contrasena NVARCHAR(255) NOT NULL, 
     empleado_id INT NULL, 
-    rol NVARCHAR(50) DEFAULT 'Usuario' CHECK (rol = 'Usuario'), 
+    rol NVARCHAR(50) DEFAULT 'Cliente' CHECK (rol = 'Cliente'), 
     fecha_creacion DATETIME DEFAULT GETDATE(),
     estatus NVARCHAR(10) DEFAULT 'Activo' CHECK (estatus IN ('Activo', 'Inactivo'))
 );

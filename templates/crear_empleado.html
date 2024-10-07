@@ -11,12 +11,42 @@
             <input type="text" id="nombre" name="nombre" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="puesto">Puesto:</label>
-            <input type="text" id="puesto" name="puesto" class="form-control" required>
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido" class="form-control" required>
         </div>
         <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="telefono">Teléfono:</label>
+            <input type="text" id="telefono" name="telefono" class="form-control" maxlength="15">
+        </div>
+        <div class="form-group">
+            <label for="direccion">Dirección:</label>
+            <input type="text" id="direccion" name="direccion" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="fecha_contratacion">Fecha de Contratación:</label>
+            <input type="date" id="fecha_contratacion" name="fecha_contratacion" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="rol">Rol:</label>
+            <select id="rol" name="rol" class="form-control" required>
+                <option value="">Selecciona un rol</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Gerente">Gerente</option>
+                <option value="Empleado">Empleado</option>
+                <option value="Tecnico">Técnico</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="estatus">Estatus:</label>
+            <select id="estatus" name="estatus" class="form-control" required>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
         </div>
         <button type="submit" class="btn btn-primary">Guardar</button>
     </form>

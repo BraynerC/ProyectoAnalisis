@@ -7,13 +7,13 @@ app.secret_key = 'Hola'
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=localhost\SQLEXPRESS;'  # Cambia esto si tu instancia tiene otro nombre
+        'SERVER=Desktop\\SQLEXPRESS;'  # Cambia esto si tu instancia tiene otro nombre
         'DATABASE=ServicentroCorazonDB;'
-         'Trusted_Connection=yes;' 
+        'Trusted_Connection=yes;' 
     )
     return connection
 
-@app.route('/index')
+@app.route('/')
 def home():
     return render_template('index.html')
 
@@ -119,6 +119,128 @@ def reset_password():
 def EMP():
     return render_template('emp_index.html')
 
+@app.route('/empleados/crear_empleado', methods=['GET', 'POST'])
+def crear_empleado():
+    if request.method == 'POST':
+        nombre = request.form.get('nombre')
+        apellido = request.form.get('apellido')
+        email = request.form.get('email')
+        telefono = request.form.get('telefono')
+        direccion = request.form.get('direccion')
+        fecha_contratacion = request.form.get('fecha_contratacion')
+        rol = request.form.get('rol')
+        estatus = request.form.get('estatus')
+
+        # Conectar a la bd
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO Empleados (nombre, apellido, email, telefono, direccion, fecha_contratacion, rol, estatus)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (nombre, apellido, email, telefono, direccion, fecha_contratacion, rol, estatus))
+
+                conn.commit()
+                flash('Empleado creado con éxito', 'success')
+                return redirect(url_for('detalles_empleado')) 
+        except Exception as e:
+            flash(f'Error al crear el empleado: {str(e)}', 'danger')
+
+    return render_template('crear_empleado.html')
+
+@app.route('/empleados/detalles_empleado')
+def detalles_empleado():
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT empleado_id, nombre, apellido, email, telefono, rol, estatus FROM Empleados")
+            empleados = cursor.fetchall()
+
+            empleados_list = []
+            for empleado in empleados:
+                empleados_list.append({
+                    'empleado_id': empleado.empleado_id,
+                    'nombre': empleado.nombre,
+                    'apellido': empleado.apellido,
+                    'email': empleado.email,
+                    'telefono': empleado.telefono,
+                    'rol': empleado.rol,
+                    'estatus': empleado.estatus
+                })
+
+    except Exception as e:
+        flash(f'Error al cargar la lista de empleados: {str(e)}', 'danger')
+        return redirect(url_for('crear_empleado'))
+    
+    return render_template('detalles_empleado.html', empleados=empleados_list)
+
+@app.route('/empleados/editar_empleado/<int:empleado_id>', methods=['GET', 'POST'])
+def editar_empleado(empleado_id):
+    if request.method == 'POST':
+        nombre = request.form.get('nombre')
+        apellido = request.form.get('apellido')
+        email = request.form.get('email')
+        telefono = request.form.get('telefono')
+        direccion = request.form.get('direccion')
+        fecha_contratacion = request.form.get('fecha_contratacion')
+        rol = request.form.get('rol')
+        estatus = request.form.get('estatus')
+
+        # Conectar a la bd y actualizar los datos del empleado
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE Empleados
+                    SET nombre = ?, apellido = ?, email = ?, telefono = ?, direccion = ?, fecha_contratacion = ?, rol = ?, estatus = ?
+                    WHERE empleado_id = ?
+                """, (nombre, apellido, email, telefono, direccion, fecha_contratacion, rol, estatus, empleado_id))
+
+                conn.commit()
+                flash('Empleado actualizado con éxito', 'success')
+                return redirect(url_for('detalles_empleado', empleado_id=empleado_id))
+        except Exception as e:
+            flash(f'Error al actualizar el empleado: {str(e)}', 'danger')
+
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM Empleados WHERE empleado_id = ?", (empleado_id,))
+            empleado = cursor.fetchone()
+            if empleado is None:
+                flash('Empleado no encontrado', 'danger')
+                return redirect(url_for('editar_empleado'))
+
+            empleado = {
+                'empleado_id': empleado.empleado_id,
+                'nombre': empleado.nombre,
+                'apellido': empleado.apellido,
+                'email': empleado.email,
+                'telefono': empleado.telefono,
+                'direccion': empleado.direccion,
+                'fecha_contratacion': empleado.fecha_contratacion,
+                'rol': empleado.rol,
+                'estatus': empleado.estatus
+            }
+    except Exception as e:
+        flash(f'Error al cargar los datos del empleado: {str(e)}', 'danger')
+        return redirect(url_for('detalles_empleado'))
+
+    return render_template('editar_empleado.html', empleado=empleado)
+
+@app.route('/empleados/eliminar_empleado/<int:empleado_id>', methods=['POST'])
+def eliminar_empleado(empleado_id):
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM Empleados WHERE empleado_id = ?", (empleado_id,))
+            conn.commit()
+            flash('Empleado eliminado con éxito', 'success')
+    except Exception as e:
+        flash(f'Error al eliminar el empleado: {str(e)}', 'danger')
+
+    return redirect(url_for('detalles_empleado'))
+
 @app.route('/empleados/solicitar_vacaciones')
 def solicitar_vacaciones():
     return render_template('solicitar_vacaciones.html')
@@ -130,18 +252,6 @@ def ver_solicitudes():
 @app.route('/empleados/revisar_solicitud')
 def revisar_solicitud():
     return render_template('revisar_solicitud.html')
-
-@app.route('/empleados/crear_empleado')
-def crear_empleado():
-    return render_template('crear_empleado.html')
-
-@app.route('/empleados/detalles_empleado')
-def detalles_empleado():
-    return render_template('detalles_empleado.html')
-
-@app.route('/empleados/editar_empleado')
-def editar_empleado():
-    return render_template('editar_empleado.html')
 
 @app.route('/empleados/calcular_nomina')
 def calcular_nomina():

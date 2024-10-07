@@ -1,33 +1,57 @@
 {% extends 'base.html' %}
-
-{% block title %}Sistema de Gestión de Empleados{% endblock %}
 {% set show_navigation = true %}
+
+{% block title %}Lista de Empleados{% endblock %}
+
 {% block content %}
-    <div class="container">
-        <h2>Lista de Empleados</h2>
-        <a href="{{ url_for('crear_empleado') }}" class="btn btn-primary">Crear Empleado</a>
-        <table class="table mt-3">
-            <thead>
+    <h1>Lista de Empleados</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Rol</th>
+                <th>Estatus</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for empleado in empleados %}
                 <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Puesto</th>
-                    <th>Email</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Camila Luna</td>
-                    <td>Desarrollador</td>
-                    <td>cluna20908@ufide.ac.cr</td>
+                    <td>{{ empleado['nombre'] }}</td>
+                    <td>{{ empleado['apellido'] }}</td>
+                    <td>{{ empleado['email'] }}</td>
+                    <td>{{ empleado['telefono'] }}</td>
+                    <td>{{ empleado['rol'] }}</td>
+                    <td>{{ empleado['estatus'] }}</td>
                     <td>
-                        <a href="{{ url_for('editar_empleado', id=1) }}" class="btn btn-warning btn-sm">Editar</a>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(1)">Eliminar</button>
+                        <a href="{{ url_for('editar_empleado', empleado_id=empleado['empleado_id']) }}" class="btn btn-warning">Editar</a>
+                        <form action="{{ url_for('eliminar_empleado', empleado_id=empleado['empleado_id']) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este empleado?');">Eliminar</button>
+                        </form>
                     </td>
                 </tr>
-            </tbody>
-        </table>
-    </div>
+            {% else %}
+                <tr>
+                    <td colspan="7">No hay empleados registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('crear_empleado') }}" class="btn btn-primary">Añadir Empleado</a>
+    <a href="{{ url_for('EMP') }}" class="btn btn-secondary">Regresar</a>
 {% endblock %}
