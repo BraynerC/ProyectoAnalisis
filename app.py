@@ -115,16 +115,20 @@ def autenticacion():
         cursor.execute('SELECT * FROM Usuarios WHERE nombre_usuario = ?', (username,))
         user = cursor.fetchone()
 
-        if user and check_password_hash(user[2], password): 
+        if user is None:
+            flash('El nombre de usuario no existe', 'danger')
+        elif not check_password_hash(user[2], password):
+            flash('La contraseña es incorrecta', 'danger')
+        else:
             session['usuario_id'] = user[0]  # ID del usuario
             session['rol'] = obtener_rol_usuario(user[0])  # Obtener el rol del usuario
-            flash('Inicio de sesión exitoso')
+            flash('Inicio de sesión exitoso', 'success')
             return redirect(url_for('home'))
-        else:
-            flash('Nombre de usuario o contraseña incorrectos')
-            return redirect(url_for('autenticacion'))
+        
+        return redirect(url_for('autenticacion'))
 
     return render_template('autenticacion.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -140,7 +144,7 @@ def register():
         user = cursor.fetchone()
 
         if user:
-            flash('El nombre de usuario ya está en uso')
+            flash('El nombre de usuario ya está en uso', 'danger')
             return redirect(url_for('register'))
 
         hashed_password = generate_password_hash(password)
@@ -149,15 +153,16 @@ def register():
             cursor.execute('''INSERT INTO Usuarios (nombre_usuario, contrasena, rol, estatus)
                               VALUES (?, ?, 'Cliente', 'Activo')''', (username, hashed_password))
             conn.commit()
-            flash('Usuario registrado exitosamente')
+            flash('Usuario registrado exitosamente', 'success')
             return redirect(url_for('autenticacion'))
         except Exception as e:
-            flash(f'Error al registrar el usuario: {e}')
+            flash(f'Error al registrar el usuario: {str(e)}', 'danger')
             return redirect(url_for('register'))
         finally:
             conn.close()
 
     return render_template('register.html')
+
 
 @app.route('/reset_password')
 def reset_password():
