@@ -13,7 +13,7 @@ def home():
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=Desktop\\SQLEXPRESS;'  # Cambia esto si tu instancia tiene otro nombre
+        'SERVER=localhost\\SQLEXPRESS;'  # Cambia esto si tu instancia tiene otro nombre
         'DATABASE=ServicentroCorazonDB;'
         'Trusted_Connection=yes;' 
     )
