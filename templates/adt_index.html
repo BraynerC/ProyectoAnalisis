@@ -7,11 +7,13 @@
         <h2>Administración de Tienda</h2>
         <p></p>
         <div class="btn-group-vertical" role="group" aria-label="Administración de Tienda">
-            <a href="{{ url_for('gestion_inventario') }}" class="btn btn-green">Inventario</a>
-            <a href="{{ url_for('gestion_proveedores') }}" class="btn btn-orange">Proveedores</a>
-            <a href="{{ url_for('gestion_promociones') }}" class="btn btn-yellow">Promociones</a>
-            <a href="{{ url_for('reportes_financieros') }}" class="btn btn-green">Reportes Financieros</a>
-            <a href="{{ url_for('gestion_productos') }}" class="btn btn-orange">Productos</a>
+            {% if rol in ['Administrador', 'Gerente'] %}
+                <a href="{{ url_for('gestion_inventario') }}" class="btn btn-green">Inventario</a>
+                <a href="{{ url_for('gestion_proveedores') }}" class="btn btn-orange">Proveedores</a>
+                <a href="{{ url_for('gestion_promociones') }}" class="btn btn-yellow">Promociones</a>
+                <a href="{{ url_for('reportes_financieros') }}" class="btn btn-green">Reportes Financieros</a>
+                <a href="{{ url_for('gestion_productos') }}" class="btn btn-orange">Productos</a>
+            {% endif %}
             <a href="{{ url_for('gestion_devoluciones') }}" class="btn btn-yellow">Devoluciones</a>
         </div>
     </div>

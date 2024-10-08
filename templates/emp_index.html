@@ -7,10 +7,12 @@
         <h2>Gestión de Empleados</h2>
         <p></p>
         <div class="btn-group-vertical" role="group" aria-label="Gestión de Empleados">
-            <a href="{{ url_for('detalles_empleado') }}" class="btn btn-green">Gestión de Empleados</a>
+            {% if session.get('rol') in ['Gerente', 'Administrador'] %}
+                <a href="{{ url_for('detalles_empleado') }}" class="btn btn-green">Gestión de Empleados</a>
+                <a href="{{ url_for('calcular_nomina') }}" class="btn btn-green">Calcular Nómina</a>
+            {% endif %}
             <a href="{{ url_for('solicitar_vacaciones') }}" class="btn btn-orange">Solicitar Vacaciones</a>
             <a href="{{ url_for('ver_solicitudes') }}" class="btn btn-yellow">Ver Solicitudes</a>
-            <a href="{{ url_for('calcular_nomina') }}" class="btn btn-green">Calcular Nómina</a>
             <a href="{{ url_for('resultado_evaluacion') }}" class="btn btn-orange">Evaluaciones de Desempeño</a>
             <a href="{{ url_for('consultar_ventas') }}" class="btn btn-yellow">Consultar Ventas</a>
         </div>

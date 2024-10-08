@@ -17,17 +17,21 @@
                 </tr>
             </thead>
             <tbody>
+                {% for solicitud in solicitudes %}
                 <tr>
-                    <td>1</td>
-                    <td>Camila Luna</td>
-                    <td>2024-09-01</td>
-                    <td>2024-09-15</td>
-                    <td>En espera</td>
+                    <td>{{ solicitud.id }}</td>
+                    <td>{{ solicitud.empleado_nombre }}</td>
+                    <td>{{ solicitud.fecha_inicio }}</td>
+                    <td>{{ solicitud.fecha_fin }}</td>
+                    <td>{{ solicitud.estado }}</td>
                     <td>
-                        <button type="button" class="btn btn-success" onclick="alert('Solicitud aprobada exitosamente')">Aprobar</button>
-                        <button type="button" class="btn btn-danger" onclick="alert('Solicitud rechazada exitosamente')">Rechazar</button>
+                        {% if rol in ['Administrador', 'Gerente'] %}
+                            <button type="button" class="btn btn-success" onclick="alert('Solicitud aprobada exitosamente')">Aprobar</button>
+                            <button type="button" class="btn btn-danger" onclick="alert('Solicitud rechazada exitosamente')">Rechazar</button>
+                        {% endif %}
                     </td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

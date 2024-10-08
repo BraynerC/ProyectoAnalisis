@@ -12,30 +12,31 @@
                 <th>Empleado</th>
                 <th>Puntuación</th>
                 <th>Comentarios</th>
-                <th>Acciones</th>
+                {% if current_user.rol in ['Administrador', 'Gerente'] %}
+                    <th>Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>1</td>
-                <td>Camila Luna</td>
-                <td>85</td>
-                <td>Buen desempeño y actitud, pero puede mejorar en trabajo en equipo.</td>
-                <td>
-                    <a href="{{ url_for('actualizar_evaluacion') }}" class="btn btn-yellow">Editar</a>
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Jane Doe</td>
-                <td>92</td>
-                <td>Excelente desempeño, muy proactiva.</td>
-                <td>
-                    <a href="{{ url_for('actualizar_evaluacion') }}" class="btn btn-yellow">Editar</a>
-                </td>
-            </tr>
+            {% for evaluacion in evaluaciones %}
+                {% if current_user.rol in ['Administrador', 'Gerente'] or current_user.empleado_id == evaluacion.empleado_id %}
+                    <tr>
+                        <td>{{ evaluacion.id }}</td>
+                        <td>{{ evaluacion.empleado_nombre }}</td>
+                        <td>{{ evaluacion.puntuacion }}</td>
+                        <td>{{ evaluacion.comentarios }}</td>
+                        {% if current_user.rol in ['Administrador', 'Gerente'] %}
+                            <td>
+                                <a href="{{ url_for('actualizar_evaluacion', evaluacion_id=evaluacion.id) }}" class="btn btn-yellow">Editar</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ url_for('evaluar_desempeno') }}" class="btn btn-orange">Evaluar</a>
+    {% if current_user.rol in ['Administrador', 'Gerente'] %}
+        <a href="{{ url_for('evaluar_desempeno') }}" class="btn btn-orange">Evaluar</a>
+    {% endif %}
 {% endblock %}

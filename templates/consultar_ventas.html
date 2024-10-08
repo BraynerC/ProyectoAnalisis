@@ -6,10 +6,13 @@
     <h1>Consultar Ventas Mensuales</h1>
 
     <form>
+        {% if rol in ['Administrador', 'Gerente'] %}
         <div class="form-group">
             <label for="empleado">Empleado:</label>
             <input type="text" id="empleado" name="empleado" class="form-control" required>
         </div>
+        {% endif %}
+        
         <div class="form-group">
             <label for="periodo">Periodo:</label>
             <select id="periodo" name="periodo" class="form-control">
@@ -19,10 +22,13 @@
                 <option value="Q4">Cuarto Cuatrimestre</option>
             </select>
         </div>
+        
         <button type="button" class="btn btn-primary">Consultar</button>
     </form>
 
+    {% if rol in ['Administrador', 'Gerente'] %}
     <a href="{{ url_for('registrar_ventas') }}" class="btn btn-orange mt-3">Registrar Ventas</a>
+    {% endif %}
 
     <div class="mt-3" id="ventas-table" style="display:none;">
         <h2>Ventas de Camila Luna</h2>

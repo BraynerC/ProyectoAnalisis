@@ -27,7 +27,9 @@
         </form>
 
         <div class="mt-3" id="reporte-links">
-            <button type="button" class="btn btn-secondary" disabled>Generar Reporte de Devoluciones</button>
+            {% if rol in ['Administrador', 'Gerente'] %}
+             <button type="button" class="btn btn-secondary" disabled>Generar Reporte de Devoluciones</button>
+             {% endif %}
         </div>
     </div>
 {% endblock %}
