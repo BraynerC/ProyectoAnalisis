@@ -7,7 +7,7 @@
         <h2>Administración de Tienda</h2>
         <p></p>
         <div class="btn-group-vertical" role="group" aria-label="Administración de Tienda">
-            {% if rol in ['Administrador', 'Gerente'] %}
+            {% if 'Administrador' in session['user_roles'] %}
                 <a href="{{ url_for('gestion_inventario') }}" class="btn btn-green">Inventario</a>
                 <a href="{{ url_for('gestion_proveedores') }}" class="btn btn-orange">Proveedores</a>
                 <a href="{{ url_for('gestion_promociones') }}" class="btn btn-yellow">Promociones</a>

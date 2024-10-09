@@ -23,50 +23,53 @@
                 <div class="sidebar-sticky">
                     <h4 class="sidebar-title">Módulos</h4>
                     <ul class="nav flex-column">
-                        {% if 'usuario_id' not in session %}  <!-- Si no hay usuario conectado -->
+                        {% if 'usuario_id' not in session %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('autenticacion') }}">Autenticación</a>
                         </li>
                         {% endif %}
-                        {% if 'Reabastecimiento' in user_roles %}
+                        {% if session['user_roles'] %}
+                        {% if 'Administrador' in session['user_roles'] %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('reabastecimiento') }}">Reabastecimiento Automatizado</a>
                         </li>
                         {% endif %}
-                        {% if 'Gestión de Empleados' in user_roles %}
+                        {% if 'Administrador' in session['user_roles'] %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('EMP') }}">Gestión de Empleados</a>
                         </li>
                         {% endif %}
-                        {% if 'Servicios Adicionales' in user_roles %}
+                        {% if 'Administrador' in session['user_roles'] %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('servicios') }}">Servicios Adicionales</a>
                         </li>
                         {% endif %}
-                        {% if 'Administración de Tienda' in user_roles %}
+                        {% if 'Administrador' in session['user_roles'] %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('ADT') }}">Administración de Tienda</a>
                         </li>
                         {% endif %}
-                        {% if 'Ventas' in user_roles %}
+                        {% if 'Administrador' in session['user_roles'] %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('pre_ventas') }}">Ventas</a>
                         </li>
                         {% endif %}
-                        {% if 'Mantenimiento Predictivo' in user_roles %}
+                        {% if 'Administrador' in session['user_roles'] %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('mantenimiento') }}">Mantenimiento Predictivo</a>
                         </li>
                         {% endif %}
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('contact') }}">Contactos</a>
                         </li>
-                        {% if 'usuario_id' in session %}  <!-- Si hay un usuario conectado -->
+                        {% if 'usuario_id' in session %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('logout') }}">Desconectarse</a>
                         </li>
                         {% endif %}
                     </ul>
+                    
                 </div>
             </nav>
             

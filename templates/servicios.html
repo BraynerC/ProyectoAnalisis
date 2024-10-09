@@ -5,8 +5,6 @@
 {% block content %}
 <div class="container">
     <h2>Gestión de Servicios</h2>
-
-    {% if rol in ['Administrador', 'Gerente'] %}
     <section id="registrar">
         <h3>Registrar Servicio</h3>
         <form>
@@ -47,7 +45,6 @@
             <button type="submit" class="btn btn-red">Eliminar Servicio</button>
         </form>
     </section>
-    {% endif %}
 
     <section id="consultar" class="mt-5">
         <h3>Consultar Servicios</h3>

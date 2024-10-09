@@ -6,45 +6,14 @@ import pyodbc  # Librería para conectar a SQL Server
 app = Flask(__name__)
 app.secret_key = 'Hola'
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=localhost\\SQLEXPRESS;'  # Cambia esto si tu instancia tiene otro nombre
+        'SERVER=localhost\\SQLEXPRESS;'
         'DATABASE=ServicentroCorazonDB;'
         'Trusted_Connection=yes;' 
     )
     return connection
-
-def obtener_rol_usuario(usuario_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    query = """
-    SELECT e.rol
-    FROM Empleados e
-    INNER JOIN Usuarios u ON u.empleado_id = e.empleado_id
-    WHERE u.usuario_id = ?
-    """
-    cursor.execute(query, (usuario_id,))
-    rol = cursor.fetchone()
-    conn.close()
-    
-    return rol[0] if rol else None
-
-def requiere_rol(roles_permitidos):
-    def decorador(f):
-        @wraps(f)
-        def decorada(*args, **kwargs):
-            rol = session.get('rol')
-            if rol not in roles_permitidos:
-                flash('No tienes permiso para acceder a esta página.', 'danger')
-                return redirect(url_for('home'))
-            return f(*args, **kwargs)
-        return decorada
-    return decorador
 
 def requiere_autenticacion(f):
     @wraps(f)
@@ -54,6 +23,40 @@ def requiere_autenticacion(f):
             return redirect(url_for('autenticacion'))
         return f(*args, **kwargs)
     return decorada
+
+def obtener_roles(usuario_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """
+    SELECT rol
+    FROM Usuarios
+    WHERE usuario_id = ?
+    """
+    cursor.execute(query, (usuario_id,))
+    roles = cursor.fetchall()
+    conn.close()
+    
+    return [rol[0] for rol in roles]  # Devuelve una lista de roles
+
+def requiere_rol(roles_permitidos):
+    def decorador(f):
+        @wraps(f)
+        def decorada(*args, **kwargs):
+            user_roles = session.get('user_roles', [])
+            if not any(rol in roles_permitidos for rol in user_roles):
+                flash('No tienes permiso para acceder a esta página.', 'danger')
+                return redirect(url_for('home'))
+            return f(*args, **kwargs)
+        return decorada
+    return decorador
+
+@app.route('/')
+@requiere_autenticacion
+def home():
+    usuario_id = session['usuario_id']
+    user_roles = session.get('user_roles', [])  # Obtener roles de la sesión
+    print(f"Roles del usuario: {user_roles}")  # Debug
+    return render_template('index.html', user_roles=user_roles)
 
 @app.route('/logout')
 def logout():
@@ -68,6 +71,101 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
+@app.route('/servicios')
+def servicios():
+    return render_template('servicios.html')
+
+@app.route('/ADT')
+def ADT():
+    return render_template('adt_index.html')
+
+@app.route('/pre_ventas')
+def pre_ventas():
+    return render_template('pre_ventas.html')
+
+@app.route('/mantenimiento')
+def mantenimiento():
+    return render_template('mantenimiento.html')
+
+@app.route('/gestion_devoluciones')
+def gestion_devoluciones():
+    return render_template('gestion_devoluciones.html')
+
+@app.route('/solicitar_vacaciones')
+def solicitar_vacaciones():
+    return render_template('solicitar_vacaciones.html')
+
+@app.route('/ver_solicitudes')
+def ver_solicitudes():
+    return render_template('ver_solicitudes.html')
+
+@app.route('/resultado_evaluacion')
+def resultado_evaluacion():
+    return render_template('resultado_evaluacion.html')
+
+@app.route('/consultar_ventas')
+def consultar_ventas():
+    return render_template('consultar_ventas.html')
+
+@app.route('/gestion_inventario')
+def gestion_inventario():
+    return render_template('gestion_inventario.html')
+
+@app.route('/gestion_proveedores')
+def gestion_proveedores():
+    return render_template('gestion_proveedores.html')
+
+@app.route('/gestion_promociones')
+def gestion_promociones():
+    return render_template('gestion_promociones.html')
+
+@app.route('/gestion_productos')
+def gestion_productos():
+    return render_template('gestion_productos.html')
+
+@app.route('/reportes_financieros')
+
+def reportes_financieros():
+    return render_template('reportes_financieros.html')
+
+@app.route('/cashier_functions')
+def cashier_functions():
+    return render_template('cashier_functions.html')
+
+@app.route('/process_sale')
+def process_sale():
+    return render_template('process_sale.html')
+
+@app.route('/configure_promotion')
+def configure_promotion():
+    return render_template('configure_promotion.html')
+
+@app.route('/technical_functions')
+def technical_functions():
+    return render_template('technical_functions.html')
+
+@app.route('/configure_parameters')
+def configure_parameters():
+    return render_template('configure_parameters.html')
+
+@app.route('/registro_producto')
+def registro_producto():
+    return render_template('registro_producto.html')
+
+@app.route('/registro_proveedor')
+def registro_proveedor():
+    return render_template('registro_proveedor.html')
+
+@app.route('/crear_promocion')
+def crear_promocion():
+    return render_template('crear_promocion.html')
+
+@app.route('/actualizar_precio_producto')
+def actualizar_precio_producto():
+    return render_template('actualizar_precio_producto.html')
+
+
 
 # Módulo Reabastecimiento
 
@@ -121,14 +219,15 @@ def autenticacion():
             flash('La contraseña es incorrecta', 'danger')
         else:
             session['usuario_id'] = user[0]  # ID del usuario
-            session['rol'] = obtener_rol_usuario(user[0])  # Obtener el rol del usuario
+            session['user_roles'] = obtener_roles(user[0])  # Guarda todos los roles en sesión
+            print(f"Roles guardados en sesión: {session['user_roles']}")  # Debug
+            
             flash('Inicio de sesión exitoso', 'success')
             return redirect(url_for('home'))
         
         return redirect(url_for('autenticacion'))
 
     return render_template('autenticacion.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -162,7 +261,6 @@ def register():
             conn.close()
 
     return render_template('register.html')
-
 
 @app.route('/reset_password')
 def reset_password():
@@ -263,263 +361,11 @@ def editar_empleado(empleado_id):
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM Empleados WHERE empleado_id = ?", (empleado_id,))
             empleado = cursor.fetchone()
-            if empleado is None:
-                flash('Empleado no encontrado', 'danger')
-                return redirect(url_for('editar_empleado'))
-
-            empleado = {
-                'empleado_id': empleado.empleado_id,
-                'nombre': empleado.nombre,
-                'apellido': empleado.apellido,
-                'email': empleado.email,
-                'telefono': empleado.telefono,
-                'direccion': empleado.direccion,
-                'fecha_contratacion': empleado.fecha_contratacion,
-                'rol': empleado.rol,
-                'estatus': empleado.estatus
-            }
     except Exception as e:
-        flash(f'Error al cargar los datos del empleado: {str(e)}', 'danger')
+        flash(f'Error al cargar el empleado: {str(e)}', 'danger')
         return redirect(url_for('detalles_empleado'))
 
     return render_template('editar_empleado.html', empleado=empleado)
-
-@app.route('/empleados/eliminar_empleado/<int:empleado_id>', methods=['POST'])
-@requiere_rol(['Administrador', 'Gerente'])
-def eliminar_empleado(empleado_id):
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM Empleados WHERE empleado_id = ?", (empleado_id,))
-            conn.commit()
-            flash('Empleado eliminado con éxito', 'success')
-            return redirect(url_for('detalles_empleado'))
-    except Exception as e:
-        flash(f'Error al eliminar el empleado: {str(e)}', 'danger')
-        return redirect(url_for('detalles_empleado'))
-
-@app.route('/empleados/solicitar_vacaciones')
-def solicitar_vacaciones():
-    if 'usuario_id' not in session:
-         return redirect(url_for('autenticacion'))
-    return render_template('solicitar_vacaciones.html')
-
-@app.route('/ver_solicitudes')
-def ver_solicitudes():
-    if 'usuario_id' not in session:
-        return redirect(url_for('autenticacion'))
-
-    usuario_id = session['usuario_id']
-    rol = session.get('rol')  
-
-    if rol in ['Administrador', 'Gerente']:
-        solicitudes = SolicitudVacaciones.query.all()  
-    else:
-        solicitudes = SolicitudVacaciones.query.filter_by(empleado_id=usuario_id).all()  
-
-    return render_template('ver_solicitudes.html', solicitudes=solicitudes, rol=rol)
-
-@app.route('/empleados/revisar_solicitud')
-@requiere_rol(['Administrador', 'Gerente'])
-def revisar_solicitud():
-    return render_template('revisar_solicitud.html')
-
-@app.route('/empleados/calcular_nomina')
-@requiere_rol(['Administrador', 'Gerente'])
-def calcular_nomina():
-    return render_template('calcular_nomina.html')
-
-@app.route('/empleados/revision_nomina')
-@requiere_rol(['Administrador', 'Gerente'])
-def revision_nomina():
-    return render_template('revision_nomina.html')
-
-@app.route('/empleados/error_calculo_nomina')
-@requiere_rol(['Administrador', 'Gerente'])
-def error_calculo_nomina():
-    return render_template('error_calculo_nomina.html')
-
-@app.route('/empleados/evaluar_desempeno')
-@requiere_rol(['Administrador', 'Gerente'])
-def evaluar_desempeno():
-    return render_template('evaluar_desempeno.html')
-
-@app.route('/empleados/resultado_evaluacion')
-def resultado_evaluacion():
-    if 'usuario_id' not in session:
-        return redirect(url_for('autenticacion'))
-
-    usuario_id = session['usuario_id']
-    rol = session.get('rol')
-
-    if rol in ['Administrador', 'Gerente']:
-        evaluaciones = EvaluacionDesempeno.query.all()
-    else:
-        evaluaciones = EvaluacionDesempeno.query.filter_by(empleado_id=usuario_id).all()
-
-    return render_template('resultado_evaluacion.html', evaluaciones=evaluaciones, rol=rol)
-
-
-@app.route('/empleados/actualizar_evaluacion')
-@requiere_rol(['Administrador', 'Gerente'])
-def actualizar_evaluacion():
-    return render_template('actualizar_evaluacion.html')
-
-@app.route('/empleados/error_evaluacion')
-@requiere_rol(['Administrador', 'Gerente'])
-def error_evaluacion():
-    return render_template('error_evaluacion.html')
-
-@app.route('/empleados/registrar_ventas')
-@requiere_rol(['Administrador', 'Gerente'])
-def registrar_ventas():
-    
-    return render_template('registrar_ventas.html')
-
-@app.route('/empleados/consultar_ventas')
-def consultar_ventas():
-    if 'usuario_id' not in session:
-        return redirect(url_for('autenticacion'))
-
-    rol = session.get('rol')  # Obtener el rol del usuario desde la sesión
-    return render_template('consultar_ventas.html', rol=rol)
-
-@app.route('/empleados/actualizar_ventas')
-@requiere_rol(['Administrador', 'Gerente'])
-def actualizar_ventas():
-    return render_template('actualizar_ventas.html')
-
-# ADT
-
-@app.route('/tienda/gestion_inventario')
-@requiere_rol(['Administrador', 'Gerente'])
-def gestion_inventario():
-    return render_template('gestion_inventario.html')
-
-@app.route('/tienda/gestion_proveedores')
-@requiere_rol(['Administrador', 'Gerente'])
-def gestion_proveedores():
-    return render_template('gestion_proveedores.html')
-
-@app.route('/tienda/gestion_promociones')
-@requiere_rol(['Administrador', 'Gerente'])
-def gestion_promociones():
-    return render_template('gestion_promociones.html')
-
-@app.route('/tienda/reportes_financieros')
-@requiere_rol(['Administrador', 'Gerente'])
-def reportes_financieros():
-    return render_template('reportes_financieros.html')
-
-@app.route('/tienda/gestion_productos')
-@requiere_rol(['Administrador', 'Gerente'])
-def gestion_productos():
-    return render_template('gestion_productos.html')
-
-@app.route('/tienda/registro_producto')
-@requiere_rol(['Administrador', 'Gerente'])
-def registro_producto():
-    return render_template('registro_producto.html')
-
-
-@app.route('/tienda/registro_proveedor')
-@requiere_rol(['Administrador', 'Gerente'])
-def registro_proveedor():
-    return render_template('registro_proveedor.html')
-
-@app.route('/tienda/crear_promocion')
-@requiere_rol(['Administrador', 'Gerente'])
-def crear_promocion():
-    return render_template('crear_promocion.html')
-
-@app.route('/tienda/actualizar_precio_producto')
-@requiere_rol(['Administrador', 'Gerente'])
-def actualizar_precio_producto():
-    return render_template('actualizar_precio_producto.html')
-
-@app.route('/tienda/gestion_devoluciones')
-@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
-def gestion_devoluciones():
-    return render_template('gestion_devoluciones.html')
-
-##################################
-
-@app.route('/servicios')
-@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
-def servicios():
-    return render_template('servicios.html')
-
-@app.route('/ADT')
-@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
-def ADT():
-    return render_template('adt_index.html')
-
-@app.route('/process_sale')
-@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
-def process_sale():
-    return render_template('ventas')
-
-@app.route('/generate_report')
-@requiere_rol(['Administrador', 'Gerente'])
-def generate_report():
-    return render_template('ventas')
-
-
-@app.route('/configure_promotion')
-@requiere_rol(['Administrador', 'Gerente'])
-def configure_promotion():
-    return render_template('ventas')
-
-@app.route('/configure_payment_method')
-@requiere_rol(['Administrador', 'Gerente'])
-def configure_payment_method():
-    return render_template('ventas')
-
-@app.route('/pre_ventas')
-@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
-def pre_ventas():
-    return render_template('pre_ventas.html')
-
-@app.route('/cashier_functions')
-@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
-def cashier_functions():
-    return render_template('cashier_functions.html')
-
-@app.route('/admin_functions')
-@requiere_rol(['Administrador', 'Gerente'])
-def admin_functions():
-    return render_template('admin_functions.html')
-
-@app.route('/mantenimiento')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico','Mantenimiento'])
-def mantenimiento():
-    return render_template('mantenimiento.html')
-
-@app.route('/technical_functions')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico','Mantenimiento'])
-def technical_functions():
-    return render_template('technical_functions.html')
-
-@app.route('/admin_functions_maintenance')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico','Mantenimiento'])
-def admin_functions_maintenance():
-    return render_template('admin_functions_maintenance.html')
-
-@app.route('/configure_parameters')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico','Mantenimiento'])
-def configure_parameters():
-    return render_template('technical_functions')
-
-@app.route('/generate_maintenance_report')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico','Mantenimiento'])
-def generate_maintenance_report():
-    return render_template('admin_functions_maintenance')
-
-@app.route('/train_system')
-@requiere_rol(['Administrador', 'Gerente'])
-def train_system():
-    return render_template('admin_functions_maintenance')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
