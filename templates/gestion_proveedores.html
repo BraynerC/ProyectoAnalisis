@@ -9,7 +9,7 @@
 
         <div class="btn-group-vertical" role="group" aria-label="Gestión de Proveedores">
             <a href="{{ url_for('registro_proveedor') }}" class="btn btn-green">Registrar Nuevo Proveedor</a>
-            <button type="button" class="btn btn-orange">Generar Reporte de Proveedores</button>
+            <a href="{{ url_for('listar_proveedores') }}" class="btn btn-yellow">Listar Proveedores</a>
         </div>
 
         <div id="mensajeExito" class="alert alert-success mt-3" style="display: none;">

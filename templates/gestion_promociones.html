@@ -8,7 +8,8 @@
         <p>Seleccione una opción para gestionar las promociones:</p>
 
         <div class="btn-group-vertical" role="group" aria-label="Gestión de Promociones">
-            <a href="{{ url_for('crear_promocion') }}" class="btn btn-green">Crear Nueva Promoción</a>
+            <a href="{{ url_for('registro_promocion') }}" class="btn btn-green">Crear Nueva Promoción</a>
+            <a href="{{ url_for('listar_promociones') }}" class="btn btn-green">Ver Promociones</a>
             <button type="button" class="btn btn-orange" onclick="generarReporte()">Generar Reporte de Promociones</button>
         </div>
 

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Listar Proveedores{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+<div class="container">
+    <h2>Lista de Proveedores</h2>
+
+    {% if proveedores|length == 0 %}
+        <div class="alert alert-info">
+            No hay proveedores registrados en la base de datos.
+        </div>
+    {% else %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre del Proveedor</th>
+                    <th>Contacto</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proveedor in proveedores %}
+                <tr>
+                    <td>{{ proveedor.id }}</td>
+                    <td>{{ proveedor.nombre_proveedor }}</td>
+                    <td>{{ proveedor.contacto }}</td>
+                    <td>{{ proveedor.telefono }}</td>
+                    <td>{{ proveedor.email }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_proveedor', id=proveedor.id) }}" class="btn btn-warning">Editar</a>
+                        <form action="{{ url_for('eliminar_proveedor', id=proveedor.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

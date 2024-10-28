@@ -39,6 +39,15 @@ CREATE TABLE Inventarios (
     fecha_ultima_actualizacion DATETIME DEFAULT GETDATE()
 );
 
+CREATE TABLE proveedores (
+    id INT IDENTITY(1,1) PRIMARY KEY,      
+    nombre_proveedor NVARCHAR(100) NOT NULL, 
+    contacto NVARCHAR(100) NOT NULL,         
+    telefono NVARCHAR(15) NOT NULL,          
+    email NVARCHAR(100) NOT NULL              
+);
+
+
 CREATE TABLE Ventas (
     venta_id INT PRIMARY KEY IDENTITY(1,1),
     empleado_id INT,

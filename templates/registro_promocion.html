@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Promoción{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+    <div class="container">
+        <h2>Registrar Promoción</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="nombre_promocion">Nombre de la Promoción:</label>
+                <input type="text" id="nombre_promocion" name="nombre_promocion" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="detalles">Detalles de la Promoción:</label>
+                <textarea id="detalles" name="detalles" class="form-control" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="fecha_inicio">Fecha de Inicio:</label>
+                <input type="datetime-local" id="fecha_inicio" name="fecha_inicio" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="fecha_fin">Fecha de Fin:</label>
+                <input type="datetime-local" id="fecha_fin" name="fecha_fin" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar Promoción</button>
+        </form>
+    </div>
+{% endblock %}

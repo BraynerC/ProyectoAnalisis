@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        {% if rol in ['Administrador', 'Gerente'] %}
+        {% if 'Administrador' in session['user_roles'] %}
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body text-center">

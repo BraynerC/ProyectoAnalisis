@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Listar Promociones{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+    <div class="container">
+        <h2>Listar Promociones</h2>
+        {% if promociones %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre de la Promoción</th>
+                        <th>Detalles</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for promocion in promociones %}
+                    <tr>
+                        <td>{{ promocion.promocion_id }}</td>
+                        <td>{{ promocion.nombre_promocion }}</td>
+                        <td>{{ promocion.detalles }}</td>
+                        <td>{{ promocion.fecha_inicio }}</td>
+                        <td>{{ promocion.fecha_fin }}</td>
+                        <td>
+                            <a href="{{ url_for('editar_promocion', promocion_id=promocion.promocion_id) }}" class="btn btn-warning">Editar</a>
+                            <a href="{{ url_for('eliminar_promocion', promocion_id=promocion.promocion_id) }}" class="btn btn-danger" onclick="return confirm('¿Está seguro de eliminar esta promoción?');">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-info">No hay promociones registradas.</div>
+        {% endif %}
+        <a href="{{ url_for('registro_promocion') }}" class="btn btn-primary">Registrar Nueva Promoción</a>
+    </div>
+{% endblock %}

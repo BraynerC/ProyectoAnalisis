@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Promoción{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+    <div class="container">
+        <h2>Editar Promoción</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="nombre_promocion">Nombre de la Promoción:</label>
+                <input type="text" id="nombre_promocion" name="nombre_promocion" class="form-control" value="{{ promocion.nombre_promocion }}" required>
+            </div>
+            <div class="form-group">
+                <label for="detalles">Detalles de la Promoción:</label>
+                <textarea id="detalles" name="detalles" class="form-control" required>{{ promocion.detalles }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="fecha_inicio">Fecha de Inicio:</label>
+                {% set fecha_inicio = promocion.fecha_inicio.strftime('%Y-%m-%dT%H:%M') if promocion.fecha_inicio else '' %}
+                <input type="datetime-local" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}" required>
+            </div>
+            <div class="form-group">
+                <label for="fecha_fin">Fecha de Fin:</label>
+                {% set fecha_fin = promocion.fecha_fin.strftime('%Y-%m-%dT%H:%M') if promocion.fecha_fin else '' %}
+                <input type="datetime-local" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ fecha_fin }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizar Promoción</button>
+        </form>
+    </div>
+{% endblock %}
