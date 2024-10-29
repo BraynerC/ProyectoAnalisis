@@ -676,9 +676,18 @@ def editar_empleado(empleado_id):
 
     return render_template('editar_empleado.html', empleado=empleado)
 
-
-
 #Reportes
+# Registrar reporte en la base de datos
+def registrar_reporte(tipo_reporte, usuario_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO Reportes (tipo_reporte, usuario_id)
+        VALUES (?, ?)
+    """, (tipo_reporte, usuario_id))
+    conn.commit()
+    conn.close()
+
 @app.route('/reporte/ventas')
 def generar_reporte_ventas_pdf():
     buffer = BytesIO()
@@ -703,7 +712,10 @@ def generar_reporte_ventas_pdf():
     pdf.showPage()
     pdf.save()
     buffer.seek(0)
-
+    
+    # Registrar el reporte en la bd
+    registrar_reporte("Ventas", usuario_id=session['usuario_id'])
+    
     return send_file(buffer, as_attachment=True, download_name="reporte_ventas.pdf", mimetype='application/pdf')
 
 # Similar para el reporte de inventario
@@ -731,8 +743,13 @@ def generar_reporte_inventario_pdf():
     pdf.showPage()
     pdf.save()
     buffer.seek(0)
-
+    
+  # Registrar el reporte en la bd
+    registrar_reporte("Inventario", usuario_id=session['usuario_id'])
+    
+    
     return send_file(buffer, as_attachment=True, download_name="reporte_inventario.pdf", mimetype='application/pdf')
+
 @app.route('/reportes')
 def seleccion_reportes():
     return render_template('seleccion_reportes.html')

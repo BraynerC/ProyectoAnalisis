@@ -25,7 +25,7 @@ CREATE TABLE Usuarios (
     nombre_usuario NVARCHAR(50) UNIQUE NOT NULL,
     contrasena NVARCHAR(255) NOT NULL, 
     empleado_id INT NULL, 
-    rol NVARCHAR(50) DEFAULT 'Cliente' CHECK (rol = 'Cliente'), 
+    rol NVARCHAR(50) DEFAULT 'Cliente', -- Constraint eliminado
     fecha_creacion DATETIME DEFAULT GETDATE(),
     estatus NVARCHAR(10) DEFAULT 'Activo' CHECK (estatus IN ('Activo', 'Inactivo'))
 );
@@ -46,7 +46,6 @@ CREATE TABLE proveedores (
     telefono NVARCHAR(15) NOT NULL,          
     email NVARCHAR(100) NOT NULL              
 );
-
 
 CREATE TABLE Ventas (
     venta_id INT PRIMARY KEY IDENTITY(1,1),
@@ -108,7 +107,6 @@ CREATE TABLE Promociones (
     fecha_creacion DATETIME DEFAULT GETDATE()
 );
 
-
 -- CREACION DE CLAVES FORANEAS
 ALTER TABLE Ventas
 ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
@@ -128,10 +126,6 @@ ALTER TABLE Reabastecimiento_Gasolina
 ADD producto_id INT,
 	FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
 
-ALTER TABLE Reportes
-ADD venta_id INT,
-	FOREIGN KEY (venta_id) REFERENCES Ventas(venta_id);
-
 ALTER TABLE Mantenimiento
 ADD empleado_id INT,
 	FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
@@ -143,4 +137,27 @@ ADD restricciones INT NULL,
 ALTER TABLE Promociones
 ADD descuento DECIMAL(5, 2), 
     fecha_inicio DATETIME, 
-    fecha_fin DATETIME; 
+    fecha_fin DATETIME;
+
+ALTER TABLE Reportes
+ADD CONSTRAINT FK_UsuarioID
+FOREIGN KEY (usuario_id) REFERENCES Usuarios(usuario_id);
+
+ALTER TABLE Usuarios
+ADD CONSTRAINT FK_EmpleadoID
+FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
+
+ALTER TABLE Promociones
+ADD producto_id INT;
+
+ALTER TABLE Promociones
+ADD FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
+
+ALTER TABLE Inventarios
+ADD marca NVARCHAR(100);
+
+ALTER TABLE Proveedores
+ADD marca_id INT;
+
+ALTER TABLE Proveedores
+ADD FOREIGN KEY (marca_id) REFERENCES Inventarios(producto_id);
