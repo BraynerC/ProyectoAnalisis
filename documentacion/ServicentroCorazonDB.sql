@@ -101,6 +101,14 @@ CREATE TABLE Reportes (
     contenido NVARCHAR(MAX)
 );
 
+CREATE TABLE Promociones (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    nombre NVARCHAR(100) NOT NULL,
+    detalles NVARCHAR(MAX),
+    fecha_creacion DATETIME DEFAULT GETDATE()
+);
+
+
 -- CREACION DE CLAVES FORANEAS
 ALTER TABLE Ventas
 ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
@@ -127,3 +135,12 @@ ADD venta_id INT,
 ALTER TABLE Mantenimiento
 ADD empleado_id INT,
 	FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
+
+ALTER TABLE Inventarios
+ADD restricciones INT NULL, 
+    descripcion NVARCHAR(MAX); 
+
+ALTER TABLE Promociones
+ADD descuento DECIMAL(5, 2), 
+    fecha_inicio DATETIME, 
+    fecha_fin DATETIME; 

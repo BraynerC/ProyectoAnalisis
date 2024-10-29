@@ -139,9 +139,54 @@ def cashier_functions():
 def admin_functions():
     return render_template('admin_functions.html')
 
-@app.route('/process_sale')
+@app.route('/process_sale', methods=['POST'])
 def process_sale():
-    return render_template('process_sale.html')
+    product_code = request.form['product_code']
+    quantity = int(request.form['quantity'])
+    customer_age = request.form.get('customer_age')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Obtener el precio y verificar restricciones
+    cursor.execute("""
+        SELECT precio, restricciones
+        FROM Productos
+        WHERE codigo_producto = ?
+    """, (product_code,))
+    
+    producto = cursor.fetchone()
+
+    if producto:
+        precio, restricciones = producto
+
+        if restricciones and customer_age and int(customer_age) < int(restricciones):
+            flash('El cliente no cumple con las restricciones de edad para este producto.', 'danger')
+            return redirect(url_for('consultar_ventas'))
+
+        total = precio * quantity
+        if quantity > 5:  # 
+            total *= 0.9  # Aplica un 10% de descuento
+
+        cursor.execute("""
+            INSERT INTO Ventas (codigo_producto, cantidad, total, fecha)
+            VALUES (?, ?, ?, ?)
+        """, (product_code, quantity, total, datetime.now()))
+        
+        cursor.execute("""
+            UPDATE Productos
+            SET stock = stock - ?
+            WHERE codigo_producto = ?
+        """, (quantity, product_code))
+
+        conn.commit()
+        flash('Venta procesada con éxito. Total: ${:.2f}'.format(total), 'success')
+    else:
+        flash('Producto no encontrado.', 'danger')
+
+    conn.close()
+    return redirect(url_for('consultar_ventas'))
+
 
 @app.route('/configure_promotion')
 def configure_promotion():
@@ -172,7 +217,7 @@ def listar_productos():
     return render_template('listar_productos.html', productos=productos)
 
 @app.route('/registro_producto', methods=['GET', 'POST'])
-@requiere_rol(['Administrador','Gerente','Empleado']) 
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def registro_producto():
     if request.method == 'POST':
         nombre_producto = request.form['nombre_producto']
@@ -192,16 +237,7 @@ def registro_producto():
 
         return redirect(url_for('registro_producto'))
 
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT producto_id, nombre_producto, cantidad, precio_unitario FROM Inventarios")
-            productos = cursor.fetchall()
-    except Exception as e:
-        flash(f'Error al obtener productos: {str(e)}', 'danger')
-        productos = []
-
-    return render_template('registro_producto.html', productos=productos)
+    return render_template('registro_producto.html')
 
 @app.route('/editar_producto/<int:producto_id>', methods=['GET', 'POST'])
 @requiere_rol(['Administrador','Gerente','Empleado']) 
@@ -285,7 +321,7 @@ def registro_promocion():
         try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("""INSERT INTO Promociones (nombre_promocion, detalles, fecha_inicio, fecha_fin, fecha_creacion)
+                cursor.execute("""INSERT INTO Promociones (nombre, detalles, fecha_inicio, fecha_fin, fecha_creacion)
                                   VALUES (?, ?, ?, ?, GETDATE())""",
                                (nombre_promocion, detalles, fecha_inicio, fecha_fin))
                 conn.commit()
@@ -296,7 +332,6 @@ def registro_promocion():
         return redirect(url_for('registro_promocion'))
 
     return render_template('registro_promocion.html')
-
 
 @app.route('/editar_promocion/<int:promocion_id>', methods=['GET', 'POST'])
 @requiere_rol(['Administrador', 'Gerente', 'Empleado'])
@@ -309,7 +344,6 @@ def editar_promocion(promocion_id):
 
         # Convertir cadenas a datetime
         try:
-            # Asegúrate de que el formato de las fechas esté correcto
             fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
             fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
         except ValueError:
@@ -320,8 +354,8 @@ def editar_promocion(promocion_id):
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""UPDATE Promociones 
-                                  SET nombre_promocion = ?, detalles = ?, fecha_inicio = ?, fecha_fin = ?
-                                  WHERE promocion_id = ?""",
+                                  SET nombre = ?, detalles = ?, fecha_inicio = ?, fecha_fin = ?
+                                  WHERE id = ?""",
                                (nombre_promocion, detalles, fecha_inicio, fecha_fin, promocion_id))
                 conn.commit()
                 flash('Promoción actualizada con éxito', 'success')
@@ -333,7 +367,7 @@ def editar_promocion(promocion_id):
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT nombre_promocion, detalles, fecha_inicio, fecha_fin FROM Promociones WHERE promocion_id = ?", (promocion_id,))
+            cursor.execute("SELECT nombre, detalles, fecha_inicio, fecha_fin FROM Promociones WHERE id = ?", (promocion_id,))
             promocion = cursor.fetchone()
     except Exception as e:
         flash(f'Error al obtener la promoción: {str(e)}', 'danger')
@@ -341,14 +375,13 @@ def editar_promocion(promocion_id):
 
     return render_template('editar_promocion.html', promocion=promocion, promocion_id=promocion_id)
 
-
 @app.route('/eliminar_promocion/<int:promocion_id>')
 @requiere_rol(['Administrador', 'Gerente'])
 def eliminar_promocion(promocion_id):
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Promociones WHERE promocion_id = ?", (promocion_id,))
+            cursor.execute("DELETE FROM Promociones WHERE id = ?", (promocion_id,))
             conn.commit()
             flash('Promoción eliminada con éxito', 'success')
     except Exception as e:
