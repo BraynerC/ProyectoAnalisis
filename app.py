@@ -1,4 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
@@ -10,7 +13,7 @@ app.secret_key = 'Hola'
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=localhost\\SQLEXPRESS;'
+        'SERVER=Desktop\\SQLEXPRESS;'
         'DATABASE=ServicentroCorazonDB;'
         'Trusted_Connection=yes;' 
     )
@@ -672,6 +675,67 @@ def editar_empleado(empleado_id):
         return redirect(url_for('detalles_empleado'))
 
     return render_template('editar_empleado.html', empleado=empleado)
+
+
+
+#Reportes
+@app.route('/reporte/ventas')
+def generar_reporte_ventas_pdf():
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    pdf.setTitle("Reporte de Ventas")
+
+    # Generar fecha de creación
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    pdf.drawString(100, 800, "Reporte de Ventas - Servicentro Corazón de Jesús")
+    pdf.drawString(100, 780, f"Fecha de Generación: {fecha_generacion}")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Ventas")
+    ventas = cursor.fetchall()
+
+    y = 750
+    for venta in ventas:
+        pdf.drawString(100, y, f"Venta ID: {venta.venta_id}, Total: {venta.total}, Fecha: {venta.fecha_venta}")
+        y -= 20
+
+    pdf.showPage()
+    pdf.save()
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name="reporte_ventas.pdf", mimetype='application/pdf')
+
+# Similar para el reporte de inventario
+@app.route('/reporte/inventario')
+def generar_reporte_inventario_pdf():
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    pdf.setTitle("Reporte de Inventario")
+
+    # Generar fecha de creación
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    pdf.drawString(100, 800, "Reporte de Inventario - Servicentro Corazón de Jesús")
+    pdf.drawString(100, 780, f"Fecha de Generación: {fecha_generacion}")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Inventarios")
+    inventario = cursor.fetchall()
+
+    y = 750
+    for item in inventario:
+        pdf.drawString(100, y, f"Producto ID: {item.producto_id}, Nombre: {item.nombre_producto}, Cantidad: {item.cantidad}")
+        y -= 20
+
+    pdf.showPage()
+    pdf.save()
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name="reporte_inventario.pdf", mimetype='application/pdf')
+@app.route('/reportes')
+def seleccion_reportes():
+    return render_template('seleccion_reportes.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

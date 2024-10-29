@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Seleccionar Reporte{% endblock %}
+
+{% block content %}
+<h2>Generación de Reportes</h2>
+<p>Selecciona el tipo de reporte que deseas generar:</p>
+
+<div>
+    <a href="{{ url_for('generar_reporte_ventas_pdf') }}" class="btn btn-green">Generar Reporte de Ventas</a>
+    <a href="{{ url_for('generar_reporte_inventario_pdf') }}" class="btn btn-green">Generar Reporte de Inventario</a>
+</div>
+{% endblock %}

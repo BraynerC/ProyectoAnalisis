@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Reporte Generado{% endblock %}
+
+{% block content %}
+<h2>Reporte Generado</h2>
+<p>El reporte ha sido generado exitosamente.</p>
+<p><a href="{{ url_for('descargar_reporte') }}" class="btn">Descargar PDF</a></p>
+<a href="{{ url_for('seleccion_reportes') }}">Volver a la selección de reportes</a>
+{% endblock %}
