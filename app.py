@@ -760,15 +760,15 @@ def generar_reporte_devoluciones_pdf():
 
     return send_file(buffer, as_attachment=True, download_name="reporte_devoluciones.pdf", mimetype='application/pdf')
 # Registrar reporte en la base de datos
-def registrar_reporte(tipo_reporte, usuario_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO Reportes (tipo_reporte, usuario_id)
-        VALUES (?, ?)
-    """, (tipo_reporte, usuario_id))
-    conn.commit()
-    conn.close()
+#def registrar_reporte(tipo_reporte, usuario_id):
+    #conn = get_db_connection()
+    #cursor = conn.cursor()
+    #cursor.execute("""
+      #  INSERT INTO Reportes (tipo_reporte, usuario_id)
+       # VALUES (?, ?)
+    #""", (tipo_reporte, usuario_id))
+   # conn.commit()
+   # conn.close()
 
 @app.route('/reporte/ventas')
 def generar_reporte_ventas_pdf():
@@ -795,10 +795,11 @@ def generar_reporte_ventas_pdf():
     pdf.save()
     buffer.seek(0)
     
-    # Registrar el reporte en la bd
-    registrar_reporte("Ventas", usuario_id=session['usuario_id'])
-    
+    # Registrar el reporte en la bd  registrar_reporte("Ventas", usuario_id=session['usuario_id']) 
+
     return send_file(buffer, as_attachment=True, download_name="reporte_ventas.pdf", mimetype='application/pdf')
+   
+   
 
 # Similar para el reporte de inventario
 @app.route('/reporte/inventario')
@@ -827,7 +828,7 @@ def generar_reporte_inventario_pdf():
     buffer.seek(0)
     
   # Registrar el reporte en la bd
-    registrar_reporte("Inventario", usuario_id=session['usuario_id'])
+    #registrar_reporte("Inventario", usuario_id=session['usuario_id'])
     
     
     return send_file(buffer, as_attachment=True, download_name="reporte_inventario.pdf", mimetype='application/pdf')
