@@ -144,3 +144,7 @@ ALTER TABLE Promociones
 ADD descuento DECIMAL(5, 2), 
     fecha_inicio DATETIME, 
     fecha_fin DATETIME; 
+
+
+ALTER TABLE Devoluciones
+ADD motivo NVARCHAR(255)

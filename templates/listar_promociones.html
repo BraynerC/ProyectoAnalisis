@@ -20,14 +20,14 @@
                 <tbody>
                     {% for promocion in promociones %}
                     <tr>
-                        <td>{{ promocion.promocion_id }}</td>
-                        <td>{{ promocion.nombre_promocion }}</td>
+                        <td>{{ promocion.id }}</td>
+                        <td>{{ promocion.nombre }}</td>
                         <td>{{ promocion.detalles }}</td>
                         <td>{{ promocion.fecha_inicio }}</td>
                         <td>{{ promocion.fecha_fin }}</td>
                         <td>
-                            <a href="{{ url_for('editar_promocion', promocion_id=promocion.promocion_id) }}" class="btn btn-warning">Editar</a>
-                            <a href="{{ url_for('eliminar_promocion', promocion_id=promocion.promocion_id) }}" class="btn btn-danger" onclick="return confirm('¿Está seguro de eliminar esta promoción?');">Eliminar</a>
+                            <a href="{{ url_for('editar_promocion', id=promocion.id) }}" class="btn btn-warning">Editar</a>
+                            <a href="{{ url_for('eliminar_promocion', id=promocion.id) }}" class="btn btn-danger" onclick="return confirm('¿Está seguro de eliminar esta promoción?');">Eliminar</a>
                         </td>
                     </tr>
                     {% endfor %}

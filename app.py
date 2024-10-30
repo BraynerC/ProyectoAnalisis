@@ -13,7 +13,7 @@ app.secret_key = 'Hola'
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=Desktop\\SQLEXPRESS;'
+        'SERVER=localhost\\SQLEXPRESS;'
         'DATABASE=ServicentroCorazonDB;'
         'Trusted_Connection=yes;' 
     )
@@ -93,10 +93,6 @@ def pre_ventas():
 def mantenimiento():
     return render_template('mantenimiento.html')
 
-@app.route('/gestion_devoluciones')
-def gestion_devoluciones():
-    return render_template('gestion_devoluciones.html')
-
 @app.route('/solicitar_vacaciones')
 def solicitar_vacaciones():
     return render_template('solicitar_vacaciones.html')
@@ -112,6 +108,7 @@ def resultado_evaluacion():
 @app.route('/consultar_ventas')
 def consultar_ventas():
     return render_template('consultar_ventas.html')
+
 
 @app.route('/gestion_inventario')
 def gestion_inventario():
@@ -151,7 +148,6 @@ def process_sale():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Obtener el precio y verificar restricciones
     cursor.execute("""
         SELECT precio, restricciones
         FROM Productos
@@ -168,8 +164,8 @@ def process_sale():
             return redirect(url_for('consultar_ventas'))
 
         total = precio * quantity
-        if quantity > 5:  # 
-            total *= 0.9  # Aplica un 10% de descuento
+        if quantity > 5:  
+            total *= 0.9  
 
         cursor.execute("""
             INSERT INTO Ventas (codigo_producto, cantidad, total, fecha)
@@ -290,13 +286,14 @@ def eliminar_producto(producto_id):
 
 #promociones
 
+
 @app.route('/promociones')
 @requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def listar_promociones():
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT promocion_id, nombre_promocion, detalles, fecha_inicio, fecha_fin FROM Promociones")
+            cursor.execute("SELECT id, nombre, detalles, fecha_inicio, fecha_fin FROM Promociones")
             promociones = cursor.fetchall()
     except Exception as e:
         flash(f'Error al obtener promociones: {str(e)}', 'danger')
@@ -308,77 +305,86 @@ def listar_promociones():
 @requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def registro_promocion():
     if request.method == 'POST':
-        nombre_promocion = request.form['nombre_promocion']
-        detalles = request.form['detalles']
-        fecha_inicio = request.form['fecha_inicio']
-        fecha_fin = request.form['fecha_fin']
-
-        # Convertir las cadenas de fecha a objetos datetime
         try:
+            nombre = request.form['nombre']  
+            detalles = request.form['detalles']
+            fecha_inicio = request.form['fecha_inicio']
+            fecha_fin = request.form['fecha_fin']
+
+            # Convertir las cadenas de fecha a objetos datetime
             fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%dT%H:%M')
             fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%dT%H:%M')
-        except ValueError:
-            flash('Error en el formato de las fechas. Asegúrate de que sean válidas.', 'danger')
-            return redirect(url_for('registro_promocion'))
 
-        try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""INSERT INTO Promociones (nombre, detalles, fecha_inicio, fecha_fin, fecha_creacion)
                                   VALUES (?, ?, ?, ?, GETDATE())""",
-                               (nombre_promocion, detalles, fecha_inicio, fecha_fin))
+                               (nombre, detalles, fecha_inicio, fecha_fin))
                 conn.commit()
                 flash('Promoción registrada con éxito', 'success')
+        except KeyError as e:
+            flash(f'Error: Falta el campo {str(e)} en el formulario.', 'danger')
+        except ValueError:
+            flash('Error en el formato de las fechas. Asegúrate de que sean válidas.', 'danger')
         except Exception as e:
             flash(f'Error al registrar la promoción: {str(e)}', 'danger')
 
-        return redirect(url_for('registro_promocion'))
+        return redirect(url_for('listar_promociones'))
 
     return render_template('registro_promocion.html')
 
-@app.route('/editar_promocion/<int:promocion_id>', methods=['GET', 'POST'])
+@app.route('/editar_promocion/<int:id>', methods=['GET', 'POST'])
 @requiere_rol(['Administrador', 'Gerente', 'Empleado'])
-def editar_promocion(promocion_id):
+def editar_promocion(id):
     if request.method == 'POST':
-        nombre_promocion = request.form['nombre_promocion']
+        if 'nombre' not in request.form or 'detalles' not in request.form:
+            flash('Error: Faltan campos en el formulario.', 'danger')
+            return redirect(url_for('editar_promocion', id=id))
+
+        nombre = request.form['nombre']  
         detalles = request.form['detalles']
         fecha_inicio_str = request.form['fecha_inicio']
         fecha_fin_str = request.form['fecha_fin']
 
-        # Convertir cadenas a datetime
         try:
             fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%dT%H:%M')
             fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%dT%H:%M')
         except ValueError:
             flash('Error: Las fechas deben estar en el formato correcto (YYYY-MM-DDTHH:MM).', 'danger')
-            return redirect(url_for('editar_promocion', promocion_id=promocion_id))
+            return redirect(url_for('editar_promocion', id=id))
 
         try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""UPDATE Promociones 
-                                  SET nombre = ?, detalles = ?, fecha_inicio = ?, fecha_fin = ?
-                                  WHERE id = ?""",
-                               (nombre_promocion, detalles, fecha_inicio, fecha_fin, promocion_id))
+                                  SET nombre = ?, detalles = ?, 
+                                      fecha_inicio = ?, fecha_fin = ? 
+                                  WHERE id = ?""",  
+                               (nombre, detalles, fecha_inicio, fecha_fin, id))
                 conn.commit()
                 flash('Promoción actualizada con éxito', 'success')
         except Exception as e:
             flash(f'Error al actualizar la promoción: {str(e)}', 'danger')
+            return redirect(url_for('editar_promocion', id=id))
 
         return redirect(url_for('listar_promociones'))
 
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT nombre, detalles, fecha_inicio, fecha_fin FROM Promociones WHERE id = ?", (promocion_id,))
+            cursor.execute("SELECT nombre, detalles, fecha_inicio, fecha_fin FROM Promociones WHERE id = ?", (id,))
             promocion = cursor.fetchone()
+            if promocion is None:
+                flash('Error: No se encontró la promoción.', 'danger')
+                return redirect(url_for('listar_promociones'))
     except Exception as e:
         flash(f'Error al obtener la promoción: {str(e)}', 'danger')
         return redirect(url_for('listar_promociones'))
 
-    return render_template('editar_promocion.html', promocion=promocion, promocion_id=promocion_id)
+    return render_template('editar_promocion.html', promocion=promocion)
 
-@app.route('/eliminar_promocion/<int:promocion_id>')
+
+@app.route('/eliminar_promocion/<int:id>')
 @requiere_rol(['Administrador', 'Gerente'])
 def eliminar_promocion(promocion_id):
     try:
@@ -575,6 +581,54 @@ def register():
 def reset_password():
     return render_template('reset_password.html')
 
+#devoluciones
+
+@app.route('/gestion_devoluciones', methods=['GET', 'POST'])
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
+def gestion_devoluciones():
+    if request.method == 'POST':
+        producto_id = request.form['producto']  # Asegúrate de que esto sea un ID de producto
+        motivo = request.form['motivo']
+        cantidad = request.form['cantidad']
+
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO Devoluciones (producto_id, motivo, cantidad, fecha_devolucion)
+                    VALUES (?, ?, ?, GETDATE())
+                """, (producto_id, motivo, cantidad))
+                conn.commit()
+                flash('Devolución registrada con éxito', 'success')
+        except Exception as e:
+            flash(f'Error al registrar la devolución: {str(e)}', 'danger')
+
+        return redirect(url_for('gestion_devoluciones'))
+
+    # Obtener todas las devoluciones de la base de datos
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT devolucion_id, venta_id, producto_id, cantidad, fecha_devolucion, motivo
+            FROM Devoluciones
+        """)
+        devoluciones = cursor.fetchall()
+
+    return render_template('gestion_devoluciones.html', devoluciones=devoluciones)
+
+@app.route('/listar_devoluciones', methods=['GET'])
+def listar_devoluciones():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Asegúrate de incluir 'motivo' en la selección
+        cursor.execute("""
+            SELECT devolucion_id, venta_id, producto_id, cantidad, fecha_devolucion, motivo
+            FROM Devoluciones
+        """)
+        devoluciones = cursor.fetchall()
+
+    return render_template('listar_devoluciones.html', devoluciones=devoluciones)
+
 # EMP
 
 @app.route('/EMP')
@@ -679,6 +733,35 @@ def editar_empleado(empleado_id):
 
 
 #Reportes
+
+@app.route('/reporte/devoluciones')
+def generar_reporte_devoluciones_pdf():
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    pdf.setTitle("Reporte de Devoluciones")
+
+    # Generar fecha de creación
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    pdf.drawString(100, 800, "Reporte de Devoluciones - Servicentro Corazón de Jesús")
+    pdf.drawString(100, 780, f"Fecha de Generación: {fecha_generacion}")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Devoluciones")
+    devoluciones = cursor.fetchall()
+
+    y = 750
+    for devolucion in devoluciones:
+        pdf.drawString(100, y, f"Devolución ID: {devolucion.devolucion_id}, Producto ID: {devolucion.producto_id}, "
+                                f"Cantidad: {devolucion.cantidad}, Fecha: {devolucion.fecha_devolucion}")
+        y -= 20
+
+    pdf.showPage()
+    pdf.save()
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name="reporte_devoluciones.pdf", mimetype='application/pdf')
+
 @app.route('/reporte/ventas')
 def generar_reporte_ventas_pdf():
     buffer = BytesIO()

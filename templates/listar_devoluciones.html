@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Listar Devoluciones{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+    <div class="container">
+        <h2>Listar Devoluciones</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto ID</th>
+                    <th>Motivo de Devolución</th>
+                    <th>Cantidad Devuelta</th>
+                    <th>Fecha</th>
+                    {% if 'Administrador' in session['user_roles'] %}
+                        <th>Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if devoluciones %}
+                    {% for devolucion in devoluciones %}
+                    <tr>
+                        <td>{{ devolucion.devolucion_id }}</td>
+                        <td>{{ devolucion.producto_id }}</td>
+                        <td>{{ devolucion.motivo }}</td>
+                        <td>{{ devolucion.cantidad }}</td>
+                        <td>{{ devolucion.fecha_devolucion.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="{% if 'Administrador' in session['user_roles'] %}6{% else %}5{% endif %}">No hay devoluciones registradas.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('gestion_devoluciones') }}" class="btn btn-secondary">Regresar a Gestión de Devoluciones</a>
+    </div>
+{% endblock %}
