@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultar Citas{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2>Citas Programadas</h2>
+        <a href="{{ url_for('gestion_servicios') }}" class="btn btn-primary mb-3">Volver a Gestión de Servicios</a>
+    
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th>Descripción</th>
+                <th>Fecha y Hora</th>
+                <th>Estado</th>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cita in citas %}
+            <tr>
+                <td>{{ cita.tipo_servicio }}</td>
+                <td>{{ cita.descripcion }}</td>
+                <td>{{ cita.fecha_servicio }}</td>
+                <td>{{ cita.estado }}</td>
+                <td>{{ cita.cliente_nombre }}</td>
+                <td>{{ cita.cliente_telefono }}</td>
+                <td>{{ cita.cliente_email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

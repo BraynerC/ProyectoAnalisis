@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Listar Promociones{% endblock %}
-{% set show_navigation = true %}
+
 {% block content %}
     <div class="container">
         <h2>Listar Promociones</h2>
@@ -11,7 +11,9 @@
                     <tr>
                         <th>ID</th>
                         <th>Nombre de la Promoción</th>
+                        <th>Producto</th>
                         <th>Detalles</th>
+                        <th>Descuento</th>
                         <th>Fecha Inicio</th>
                         <th>Fecha Fin</th>
                         <th>Acciones</th>
@@ -22,7 +24,9 @@
                     <tr>
                         <td>{{ promocion.id }}</td>
                         <td>{{ promocion.nombre }}</td>
+                        <td>{{ promocion.nombre_producto }}</td>
                         <td>{{ promocion.detalles }}</td>
+                        <td>{{ promocion.descuento }}%</td>
                         <td>{{ promocion.fecha_inicio }}</td>
                         <td>{{ promocion.fecha_fin }}</td>
                         <td>

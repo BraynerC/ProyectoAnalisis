@@ -178,3 +178,19 @@ CREATE TABLE Clientes (
 
 ALTER TABLE Servicios_Adicionales
 ADD cliente_id INT;
+
+CREATE TABLE Citas (
+    cita_id INT PRIMARY KEY IDENTITY(1,1),
+    tipo_servicio VARCHAR(50),
+    descripcion TEXT,
+    fecha_servicio DATETIME,
+    estado VARCHAR(50) DEFAULT 'Pendiente',
+);
+
+ALTER TABLE Citas
+ADD cliente_nombre VARCHAR(100),
+    cliente_telefono VARCHAR(20),
+    cliente_email VARCHAR(100);
+
+ALTER TABLE Promociones
+ADD producto_id INT;

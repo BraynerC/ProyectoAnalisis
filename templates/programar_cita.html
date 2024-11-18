@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Programar Cita{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2>Programar Cita</h2>
+    <form method="POST" action="{{ url_for('programar_cita') }}">
+        <div class="form-group">
+            <label for="tipo_servicio">Tipo de Servicio:</label>
+            <select id="tipo_servicio" name="tipo_servicio" class="form-control" required>
+                <option value="Llantera">Llantera</option>
+                <option value="Lubricentro">Lubricentro</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="descripcion">Descripción del Servicio:</label>
+            <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Ingrese los detalles del servicio" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="fecha_servicio">Fecha y Hora del Servicio:</label>
+            <input type="datetime-local" id="fecha_servicio" name="fecha_servicio" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="cliente_nombre">Nombre del Cliente:</label>
+            <input type="text" id="cliente_nombre" name="cliente_nombre" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="cliente_telefono">Teléfono del Cliente:</label>
+            <input type="text" id="cliente_telefono" name="cliente_telefono" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="cliente_email">Email del Cliente:</label>
+            <input type="email" id="cliente_email" name="cliente_email" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Programar Cita</button>
+        <a href="{{ url_for('consultar_citas') }}" class="btn btn-orange">Consultar Citas</a>
+        <a href="{{ url_for('gestion_servicios') }}" class="btn btn-secondary ml-3">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

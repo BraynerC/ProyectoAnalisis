@@ -355,11 +355,18 @@ def eliminar_producto(producto_id):
     flash('Producto eliminado con éxito', 'success')
     return redirect(url_for('listar_productos'))
 
+
 @app.route('/promociones')
 @requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def listar_promociones():
-    promociones = execute_query("SELECT id, nombre, detalles, fecha_inicio, fecha_fin FROM Promociones")
+    promociones = execute_query("""
+        SELECT p.id, p.nombre, p.detalles, p.fecha_inicio, p.fecha_fin, p.descuento, i.nombre_producto
+        FROM Promociones p
+        JOIN Inventarios i ON p.producto_id = i.producto_id
+    """)
     return render_template('listar_promociones.html', promociones=promociones)
+
+
 
 @app.route('/registro_promocion', methods=['GET', 'POST'])
 @requiere_rol(['Administrador', 'Gerente', 'Empleado'])
@@ -369,24 +376,30 @@ def registro_promocion():
         detalles = request.form['detalles']
         fecha_inicio = request.form['fecha_inicio']
         fecha_fin = request.form['fecha_fin']
+        descuento = request.form['descuento']
+        producto_id = request.form['producto_id']
 
+        # Convierte las fechas a tipo datetime
         fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%dT%H:%M')
         fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%dT%H:%M')
         
-        execute_query("""INSERT INTO Promociones (nombre, detalles, fecha_inicio, fecha_fin, fecha_creacion)
-                          VALUES (?, ?, ?, ?, GETDATE())""",
-                       (nombre, detalles, fecha_inicio, fecha_fin))
+        # Inserta la nueva promoción en la base de datos
+        execute_query("""INSERT INTO Promociones (nombre, detalles, fecha_inicio, fecha_fin, descuento, fecha_creacion, producto_id)
+                          VALUES (?, ?, ?, ?, ?, GETDATE(), ?)""",
+                       (nombre, detalles, fecha_inicio, fecha_fin, descuento, producto_id))
 
         flash('Promoción registrada con éxito', 'success')
         return redirect(url_for('listar_promociones'))
 
-    return render_template('registro_promocion.html')
+    # Obtener todos los productos disponibles
+    productos = execute_query("SELECT producto_id, nombre_producto FROM Inventarios")
+    return render_template('registro_promocion.html', productos=productos)
 
 @app.route('/editar_promocion/<int:id>', methods=['GET', 'POST'])
 @requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def editar_promocion(id):
     if request.method == 'POST':
-        nombre = request.form['nombre']  
+        nombre = request.form['nombre']
         detalles = request.form['detalles']
         fecha_inicio = datetime.strptime(request.form['fecha_inicio'], '%Y-%m-%dT%H:%M')
         fecha_fin = datetime.strptime(request.form['fecha_fin'], '%Y-%m-%dT%H:%M')
@@ -394,7 +407,7 @@ def editar_promocion(id):
         execute_query("""UPDATE Promociones 
                           SET nombre = ?, detalles = ?, 
                               fecha_inicio = ?, fecha_fin = ? 
-                          WHERE id = ?""",  
+                          WHERE id = ?""",
                        (nombre, detalles, fecha_inicio, fecha_fin, id))
 
         flash('Promoción actualizada con éxito', 'success')
@@ -407,7 +420,6 @@ def editar_promocion(id):
         return redirect(url_for('listar_promociones'))
 
     return render_template('editar_promocion.html', promocion=promocion[0])
-
 
 @app.route('/eliminar_promocion/<int:id>')
 @requiere_rol(['Administrador', 'Gerente'])
@@ -688,6 +700,70 @@ def generar_reporte_inventario_pdf():
 @app.route('/reportes')
 def seleccion_reportes():
     return render_template('seleccion_reportes.html')
+
+@app.route('/programar_cita', methods=['GET', 'POST'])
+def programar_cita():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        tipo_servicio = request.form['tipo_servicio']
+        descripcion = request.form['descripcion']
+        fecha_servicio_str = request.form['fecha_servicio']
+        cliente_nombre = request.form['cliente_nombre']
+        cliente_telefono = request.form['cliente_telefono']
+        cliente_email = request.form['cliente_email']
+
+        # Convertir la fecha desde el formato string a datetime
+        try:
+            fecha_servicio = datetime.strptime(fecha_servicio_str, '%Y-%m-%dT%H:%M')
+        except ValueError:
+            flash("La fecha proporcionada no es válida. Intente nuevamente.", 'error')
+            return redirect(url_for('programar_cita'))
+
+        # Verificar disponibilidad
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM Citas 
+            WHERE tipo_servicio = ? AND fecha_servicio = ?;
+        """, (tipo_servicio, fecha_servicio))
+        disponibilidad = cursor.fetchone()[0]
+
+        if disponibilidad > 0:
+            flash('Ya existe una cita programada para ese horario.', 'error')
+            return redirect(url_for('programar_cita'))
+
+        # Registrar cita con los datos del cliente
+        cursor.execute("""
+            INSERT INTO Citas (tipo_servicio, descripcion, fecha_servicio, cliente_nombre, cliente_telefono, cliente_email) 
+            VALUES (?, ?, ?, ?, ?, ?);
+        """, (tipo_servicio, descripcion, fecha_servicio, cliente_nombre, cliente_telefono, cliente_email))
+        conn.commit()
+
+        flash('Cita programada exitosamente.', 'success')
+        return redirect(url_for('consultar_citas'))
+
+    cursor.close()
+    conn.close()
+    return render_template('programar_cita.html')
+
+@app.route('/consultar_citas', methods=['GET'])
+def consultar_citas():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Obtener todas las citas programadas
+    cursor.execute("""
+        SELECT cita_id, tipo_servicio, descripcion, fecha_servicio, estado, cliente_nombre, cliente_telefono, cliente_email
+        FROM Citas
+        ORDER BY fecha_servicio;
+    """)
+    citas = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('consultar_citas.html', citas=citas)
 
 if __name__ == '__main__':
     app.run(debug=True)
