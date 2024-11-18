@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultar Servicios{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2>Servicios Registrados</h2>
+
+    {% if servicios %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo de Servicio</th>
+                    <th>Detalles</th>
+                    <th>Fecha de Servicio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for servicio in servicios %}
+                    <tr>
+                        <td>{{ servicio.servicio_id }}</td>
+                        <td>{{ servicio.tipo_servicio }}</td>
+                        <td>{{ servicio.descripcion }}</td>
+                        <td>{{ servicio.fecha_servicio }}</td>
+                        <td>
+                            <a href="{{ url_for('editar_servicio', servicio_id=servicio.servicio_id) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <form action="{{ url_for('eliminar_servicio', servicio_id=servicio.servicio_id) }}" method="POST" style="display:inline;">
+                                <button type="submit"  class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este servicio?')">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay servicios registrados en la base de datos.</p>
+    {% endif %}
+
+    <a href="{{ url_for('gestion_servicios') }}" class="btn btn-secondary mt-3">Volver a la Gestión de Servicios</a>
+</div>
+{% endblock %}

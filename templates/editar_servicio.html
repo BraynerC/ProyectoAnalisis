@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Servicio{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2>Editar Servicio Adicional</h2>
+    <form method="POST" action="{{ url_for('editar_servicio', servicio_id=servicio.servicio_id) }}">
+        <div class="form-group">
+            <label for="tipo_servicio">Tipo de Servicio:</label>
+            <input type="text" id="tipo_servicio" name="tipo_servicio" class="form-control" value="{{ servicio.tipo_servicio }}" required>
+        </div>
+        <div class="form-group">
+            <label for="detalles">Detalles del Servicio:</label>
+            <textarea id="detalles" name="detalles" class="form-control" required>{{ servicio.descripcion }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-orange">Actualizar Servicio</button>
+        <a href="{{ url_for('consultar_servicios') }}" class="btn btn-secondary ml-3">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

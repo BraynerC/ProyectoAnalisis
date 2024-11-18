@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Servicio{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2>Registrar Servicio Adicional</h2>
+    <form method="POST" action="{{ url_for('registrar_servicio') }}">
+            <div class="form-group">
+                <label for="tipo_servicio">Tipo de Servicio:</label>
+                <select id="tipo_servicio" name="tipo_servicio" class="form-control" required>
+                    <option value="Llantera">Llantera</option>
+                    <option value="Lubricentro">Lubricentro</option>
+                </select>
+            </div>
+        <div class="form-group">
+            <label for="detalles">Detalles del Servicio:</label>
+            <textarea id="detalles" name="detalles" class="form-control" placeholder="Ingrese los detalles del servicio" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-orange">Guardar Servicio</button>
+        <a href="{{ url_for('gestion_servicios') }}" class="btn btn-secondary ml-3">Volver a la Gestión de Servicios</a>
+    </form>
+</div>
+{% endblock %}

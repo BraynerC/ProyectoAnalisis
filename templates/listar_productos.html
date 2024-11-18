@@ -25,7 +25,9 @@
                         <td>{{ producto[3] }}</td>
                         <td>
                             <a href="{{ url_for('editar_producto', producto_id=producto[0]) }}" class="btn btn-warning btn-sm">Editar</a>
-                            <a href="{{ url_for('eliminar_producto', producto_id=producto[0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">Eliminar</a>
+                            <form action="{{ url_for('eliminar_producto', producto_id=producto[0]) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}
