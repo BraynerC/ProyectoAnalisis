@@ -194,3 +194,8 @@ ADD cliente_nombre VARCHAR(100),
 
 ALTER TABLE Promociones
 ADD producto_id INT;
+
+ALTER TABLE Citas
+DROP CONSTRAINT FK__Citas__cliente_i__5224328E;
+
+
