@@ -166,3 +166,15 @@ ADD marca_id INT;
 
 ALTER TABLE Proveedores
 ADD FOREIGN KEY (marca_id) REFERENCES Inventarios(producto_id);
+
+Nuevo
+
+CREATE TABLE Clientes (
+    cliente_id INT PRIMARY KEY IDENTITY(1,1),
+    nombre NVARCHAR(100),
+    telefono NVARCHAR(15),
+    email NVARCHAR(100)
+);
+
+ALTER TABLE Servicios_Adicionales
+ADD cliente_id INT;
