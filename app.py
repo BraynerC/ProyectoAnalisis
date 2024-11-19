@@ -6,6 +6,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
 from flask import jsonify
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from flask import Flask, request, jsonify
+import pyodbc
+from datetime import datetime
 import pyodbc  
 
 
@@ -856,6 +862,128 @@ def consultar_citas():
     conn.close()
 
     return render_template('consultar_citas.html', citas=citas)
+
+# Rutas relacionadas con la venta de gasolina
+@app.route('/gestion_gasolina')
+def gestion_gasolina():
+    return render_template('gestion_gasolina.html')
+
+@app.route('/venta_gasolina', methods=['GET', 'POST'])
+def venta_gasolina():
+    if request.method == 'GET':
+        return render_template('venta_gasolina.html')
+    elif request.method == 'POST':
+        tipo_gasolina = request.form['tipo_gasolina']
+        litros_vendidos = float(request.form['litros_vendidos'])
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Actualiza la cantidad de gasolina en la base de datos
+        cursor.execute("""
+            UPDATE gasolina
+            SET cantidad_litros = cantidad_litros - ?
+            WHERE tipo = ?
+        """, litros_vendidos, tipo_gasolina)
+        
+        # Verifica si el nivel está por debajo del mínimo
+        cursor.execute("SELECT cantidad_litros, minimo_litros FROM gasolina WHERE tipo = ?", tipo_gasolina)
+        gasolina = cursor.fetchone()
+        
+        if gasolina and gasolina[0] <= gasolina[1]:
+            enviar_alerta_correo(tipo_gasolina, "destinario.servicentrocj@gmail.com")
+
+        conn.commit()
+        conn.close()
+        return redirect('/alertas')
+
+# Rutas relacionadas con el reabastecimiento
+@app.route('/reabastecer', methods=['GET', 'POST'])
+def reabastecer():
+    if request.method == 'GET':
+        return render_template('reabastecer.html')
+    elif request.method == 'POST':
+        tipo_gasolina = request.form['tipo_gasolina']
+        cantidad = float(request.form['cantidad'])
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT gasolina_id FROM gasolina WHERE tipo = ?", tipo_gasolina)
+        gasolina_id = cursor.fetchone()[0]
+
+        fecha_actual = datetime.now()
+        cursor.execute("""
+            INSERT INTO reabastecimiento (gasolina_id, cantidad, fecha_solicitud)
+            VALUES (?, ?, ?)
+        """, gasolina_id, cantidad, fecha_actual)
+
+        cursor.execute("""
+            UPDATE gasolina
+            SET cantidad_litros = cantidad_litros + ?
+            WHERE tipo = ?
+        """, cantidad, tipo_gasolina)
+
+        conn.commit()
+        conn.close()
+        return redirect('/')
+
+# Ruta para mostrar las alertas
+@app.route('/alertas', methods=['GET', 'POST'])
+def alertas():
+    if request.method == 'POST':
+        tipo_gasolina = request.form['tipo_gasolina']
+        enviar_alerta_correo(tipo_gasolina, "destinario.servicentrocj@gmail.com" )
+        return redirect('/alertas')  # Redirige a la página de alertas después de enviar el correo
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT tipo, cantidad_litros, minimo_litros
+        FROM gasolina
+        WHERE cantidad_litros <= minimo_litros
+    """)
+    alertas = [{"tipo": row[0], "cantidad_litros": row[1], "minimo_litros": row[2]} for row in cursor.fetchall()]
+    conn.close()
+
+    return render_template('alertas.html', alertas=alertas)
+
+# Función para enviar alertas por correo
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
+    remitente = "remitente.servicentrocj@gmail.com"
+    password = "wrcf yejw zkqv wqsb"
+    destinatario = correo_proveedor
+
+    asunto = "Alerta: Solicitud de reabastecimiento"
+    cuerpo = f"""
+    Estimado proveedor,
+
+    El nivel de gasolina para el tipo '{tipo_gasolina}' ha llegado al mínimo establecido.
+    Por favor, procese un reabastecimiento lo antes posible.
+
+    Saludos,
+    Gestión de Gasolinera
+    """
+
+    mensaje = MIMEMultipart()
+    mensaje['From'] = remitente
+    mensaje['To'] = destinatario
+    mensaje['Subject'] = asunto
+    mensaje.attach(MIMEText(cuerpo, 'plain'))
+
+    try:
+        servidor = smtplib.SMTP('smtp.gmail.com', 587)
+        servidor.starttls()
+        servidor.login(remitente, password)
+        servidor.send_message(mensaje)
+        servidor.quit()
+        print("Correo enviado exitosamente")
+    except Exception as e:
+        print(f"Error enviando el correo: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Reabastecimiento de Gasolina{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4">Reabastecimiento de Gasolina</h2>
+    <form method="POST" action="{{ url_for('reabastecer') }}">
+        <div class="form-group">
+            <label for="tipo_gasolina">Tipo de Gasolina:</label>
+            <select name="tipo_gasolina" id="tipo_gasolina" class="form-control" required>
+                <option value="Gasolina Super">Gasolina Super</option>
+                <option value="Gasolina Regular">Gasolina Regular</option>
+                <option value="Diesel">Diesel</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="cantidad">Cantidad a Reabastecer:</label>
+            <input type="number" name="cantidad" id="cantidad" class="form-control" placeholder="Ingrese la cantidad a reabastecer" required>
+        </div>
+        <button type="submit" class="btn btn-orange">Registrar Reabastecimiento</button>
+        <a href="{{ url_for('gestion_gasolina') }}" class="btn btn-secondary ml-3">Volver a Gestión</a>
+    </form>
+</div>
+{% endblock %}
