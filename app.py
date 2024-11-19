@@ -5,7 +5,9 @@ from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
+from flask import jsonify
 import pyodbc  
+
 
 app = Flask(__name__)
 app.secret_key = 'Hola'
@@ -142,19 +144,20 @@ def configure_promotion():
 
 @app.route('/technical_functions')
 def technical_functions():
-    # Obtener los parámetros actuales de la base de datos
-    query = "SELECT pressure_limit, temperature_limit, fuel_level_limit FROM Parametros_Mantenimiento WHERE id = 1"
+    # Obtener los parámetros actuales de la DB
+    query = "SELECT pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion FROM Parametros_Mantenimiento WHERE id = 1"
     parameters = execute_query(query)
     
     if parameters:
-        pressure_limit, temperature_limit, fuel_level_limit = parameters[0]
+        pressure_limit, temperature_limit, fuel_level_limit, last_update = parameters[0]
     else:
-        # Si no hay parámetros, se asignan valores predeterminados
-        pressure_limit, temperature_limit, fuel_level_limit = 0, 0, 0
+        pressure_limit, temperature_limit, fuel_level_limit, last_update = 0, 0, 0, None
 
-    # Pasar los parámetros a la plantilla
-    return render_template('technical_functions.html', pressure_limit=pressure_limit,
-                           temperature_limit=temperature_limit, fuel_level_limit=fuel_level_limit)
+    return render_template('technical_functions.html', 
+                           pressure_limit=pressure_limit,
+                           temperature_limit=temperature_limit,
+                           fuel_level_limit=fuel_level_limit,
+                           last_update=last_update)
 
 
 @app.route('/update_parameters', methods=['POST'])
@@ -170,8 +173,8 @@ def update_parameters():
         
         if count == 0:
             query_insert = """
-            INSERT INTO Parametros_Mantenimiento (id, pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion)
-            VALUES (1, ?, ?, ?, GETDATE())
+            INSERT INTO Parametros_Mantenimiento (pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion)
+            VALUES (?, ?, ?, GETDATE())
             """
             execute_query(query_insert, (pressure_limit, temperature_limit, fuel_level_limit), fetch=False)
             flash("Parámetros guardados exitosamente.", "success")
@@ -188,6 +191,7 @@ def update_parameters():
         flash(f"Error al actualizar parámetros: {str(e)}", "danger")
     
     return redirect(url_for('technical_functions'))
+
 
 @app.route('/manual_check', methods=['POST'])
 def manual_check():
@@ -209,24 +213,31 @@ def manual_check():
     
     return redirect(url_for('technical_functions'))
 
-@app.route('/get_parameters', methods=['GET'])
+@app.route('/get_parameters')
 def get_parameters():
     try:
         query = "SELECT pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion FROM Parametros_Mantenimiento WHERE id = 1"
         parameters = execute_query(query)
 
         if parameters:
-            pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion = parameters[0]
-            last_update = fecha_actualizacion.strftime("%d/%b/%Y %I:%M %p")
-            monitoring_message = f"Presión: {pressure_limit} PSI, Temperatura: {temperature_limit} °C, Combustible: {fuel_level_limit} Litros"
-            return {"last_update": last_update, "monitoring_message": monitoring_message}
+            pressure_limit, temperature_limit, fuel_level_limit, last_update = parameters[0]
+
+            return jsonify({
+                'pressure_limit': pressure_limit,
+                'temperature_limit': temperature_limit,
+                'fuel_level_limit': fuel_level_limit,
+                'last_update': last_update.strftime('%d/%b/%Y %I:%M %p')
+            })
         else:
-            return {"last_update": "No disponible", "monitoring_message": "No hay parámetros disponibles"}
-        
+            return jsonify({
+                'pressure_limit': 0,
+                'temperature_limit': 0,
+                'fuel_level_limit': 0,
+                'last_update': 'No disponible'
+            })
     except Exception as e:
-        return {"last_update": "Error", "monitoring_message": f"Error al obtener parámetros: {str(e)}"}
 
-
+        return jsonify({'error': f'Error al obtener los parámetros: {str(e)}'}), 500
 
 
 @app.route('/actualizar_precio_producto')

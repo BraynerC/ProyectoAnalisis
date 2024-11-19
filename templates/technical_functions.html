@@ -8,7 +8,7 @@
     <!-- Formulario de configuración de parámetros -->
     <div class="card mt-4">
         <div class="card-header">
-            <h3>Configuración de Parámetros</h3>
+            <h3>Configuración de Parámetros - Test 5</h3>
         </div>
         <div class="card-body">
             <form method="post" action="{{ url_for('update_parameters') }}">
@@ -47,24 +47,32 @@
         </div>
         <div class="card-body">
             <p>El sistema está monitoreando continuamente los tanques de gasolina.</p>
-            <p id="last-update">Última actualización: <span>{{ "18/Nov/2024 10:00 AM" }}</span></p>
-            <div id="monitoring-messages"></div>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <script>
-            setInterval(function() {
-                $.get("{{ url_for('get_parameters') }}", function(data) {
-
-                    $('#last-update').text("Última actualización: " + data.last_update);
-                    $('#monitoring-messages').text(data.monitoring_message);
-                });
-                }, 5000); // Cada 5 segundos
-                </script>
-            
+            <p>Última actualización: <span id="last-update">{{ last_update.strftime('%d/%b/%Y %I:%M %p') if last_update else 'No disponible' }}</span></p>
+            <div id="monitoring-messages-section"></div>
             <form method="post" action="{{ url_for('manual_check') }}">
                 <button type="submit" class="btn btn-danger">Realizar Verificación Manual</button>
             </form>            
-            <div id="monitoring-messages" class="mt-3"></div>
+            <div id="monitoring-messages-section" class="mt-3"></div>
         </div>
     </div>
 </div>
+
+<script>
+    // Actualización automática de los parámetros
+    function updateParameters() {
+        fetch('/get_parameters')  
+            .then(response => response.json())  
+            .then(data => {
+                document.getElementById('pressure-limit').value = data.pressure_limit;
+                document.getElementById('temperature-limit').value = data.temperature_limit;
+                document.getElementById('fuel-level-limit').value = data.fuel_level_limit;
+                document.getElementById('last-update').textContent = data.last_update;
+            })
+            .catch(error => console.error('Error al obtener los parámetros:', error));
+    }
+
+    // 5 segundos
+    setInterval(updateParameters, 5000);
+</script>
+
 {% endblock %}
