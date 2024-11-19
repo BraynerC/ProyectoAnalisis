@@ -144,6 +144,27 @@ CREATE TABLE Citas (
     cliente_email VARCHAR(100)
 );
 
+CREATE TABLE gasolina (
+    gasolina_id INT PRIMARY KEY IDENTITY(1,1),
+    tipo VARCHAR(50), 
+    cantidad_litros FLOAT,
+    minimo_litros FLOAT 
+);
+
+INSERT INTO gasolina (tipo, cantidad_litros, minimo_litros)
+VALUES 
+    ('Gasolina Super', 5000, 1000),
+    ('Gasolina Regular', 7000, 1500), 
+    ('Diesel', 10000, 2000); 
+
+CREATE TABLE reabastecimiento (
+    reabastecimiento_id INT PRIMARY KEY IDENTITY(1,1),
+    gasolina_id INT FOREIGN KEY REFERENCES gasolina(gasolina_id),
+    cantidad FLOAT,
+    fecha_solicitud DATETIME,
+    fecha_entrega DATETIME
+);
+
 -- CREACION DE CLAVES FORANEAS
 ALTER TABLE Ventas
 ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
