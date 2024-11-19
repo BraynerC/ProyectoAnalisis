@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Alertas de Gasolina{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4">Alertas de Gasolina</h2>
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Tipo de Gasolina</th>
+                <th>Litros Disponibles</th>
+                <th>Litros Mínimos</th>
+                <th>Enviar Alerta</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alerta in alertas %}
+            <tr>
+                <td>{{ alerta.tipo }}</td>
+                <td>{{ alerta.cantidad_litros }}</td>
+                <td>{{ alerta.minimo_litros }}</td>
+                <td>
+                    <form action="{{ url_for('alertas') }}" method="post">
+                        <input type="hidden" name="tipo_gasolina" value="{{ alerta.tipo }}">
+                        <button type="submit" class="btn btn-warning btn-sm">Enviar Alerta</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('gestion_gasolina') }}" class="btn btn-secondary mt-3">Volver a Gestión</a>
+</div>
+{% endblock %}
