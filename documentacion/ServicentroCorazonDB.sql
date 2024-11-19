@@ -107,6 +107,15 @@ CREATE TABLE Promociones (
     fecha_creacion DATETIME DEFAULT GETDATE()
 );
 
+CREATE TABLE Parametros_Mantenimiento (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    pressure_limit DECIMAL(10, 2) NOT NULL,
+    temperature_limit DECIMAL(10, 2) NOT NULL,
+    fuel_level_limit DECIMAL(10, 2) NOT NULL,
+    fecha_actualizacion DATETIME DEFAULT GETDATE()
+);
+
+
 -- CREACION DE CLAVES FORANEAS
 ALTER TABLE Ventas
 ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);

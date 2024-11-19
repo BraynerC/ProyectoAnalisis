@@ -142,11 +142,92 @@ def configure_promotion():
 
 @app.route('/technical_functions')
 def technical_functions():
-    return render_template('technical_functions.html')
+    # Obtener los parámetros actuales de la base de datos
+    query = "SELECT pressure_limit, temperature_limit, fuel_level_limit FROM Parametros_Mantenimiento WHERE id = 1"
+    parameters = execute_query(query)
+    
+    if parameters:
+        pressure_limit, temperature_limit, fuel_level_limit = parameters[0]
+    else:
+        # Si no hay parámetros, se asignan valores predeterminados
+        pressure_limit, temperature_limit, fuel_level_limit = 0, 0, 0
 
-@app.route('/configure_parameters')
-def configure_parameters():
-    return render_template('configure_parameters.html')
+    # Pasar los parámetros a la plantilla
+    return render_template('technical_functions.html', pressure_limit=pressure_limit,
+                           temperature_limit=temperature_limit, fuel_level_limit=fuel_level_limit)
+
+
+@app.route('/update_parameters', methods=['POST'])
+def update_parameters():
+    try:
+        pressure_limit = request.form['pressure_limit']
+        temperature_limit = request.form['temperature_limit']
+        fuel_level_limit = request.form['fuel_level_limit']
+        
+        query_check = "SELECT COUNT(*) FROM Parametros_Mantenimiento WHERE id = 1"
+        result = execute_query(query_check, fetch=True)
+        count = result[0][0] if result else 0
+        
+        if count == 0:
+            query_insert = """
+            INSERT INTO Parametros_Mantenimiento (id, pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion)
+            VALUES (1, ?, ?, ?, GETDATE())
+            """
+            execute_query(query_insert, (pressure_limit, temperature_limit, fuel_level_limit), fetch=False)
+            flash("Parámetros guardados exitosamente.", "success")
+        else:
+            query_update = """
+            UPDATE Parametros_Mantenimiento
+            SET pressure_limit = ?, temperature_limit = ?, fuel_level_limit = ?, fecha_actualizacion = GETDATE()
+            WHERE id = 1
+            """
+            execute_query(query_update, (pressure_limit, temperature_limit, fuel_level_limit), fetch=False)
+            flash("Parámetros actualizados exitosamente.", "success")
+            
+    except Exception as e:
+        flash(f"Error al actualizar parámetros: {str(e)}", "danger")
+    
+    return redirect(url_for('technical_functions'))
+
+@app.route('/manual_check', methods=['POST'])
+def manual_check():
+    try:
+
+        query = "SELECT pressure_limit, temperature_limit, fuel_level_limit FROM Parametros_Mantenimiento WHERE id = 1"
+        parameters = execute_query(query)
+        
+        if parameters:
+            pressure_limit, temperature_limit, fuel_level_limit = parameters[0]
+
+            message = f"Verificación exitosa: Presión: {pressure_limit} PSI, Temperatura: {temperature_limit} °C, Combustible: {fuel_level_limit} Litros"
+            flash(message, 'success')
+        else:
+            flash("No se encontraron parámetros en la base de datos.", 'danger')
+
+    except Exception as e:
+        flash(f"Error en la verificación manual: {str(e)}", "danger")
+    
+    return redirect(url_for('technical_functions'))
+
+@app.route('/get_parameters', methods=['GET'])
+def get_parameters():
+    try:
+        query = "SELECT pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion FROM Parametros_Mantenimiento WHERE id = 1"
+        parameters = execute_query(query)
+
+        if parameters:
+            pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion = parameters[0]
+            last_update = fecha_actualizacion.strftime("%d/%b/%Y %I:%M %p")
+            monitoring_message = f"Presión: {pressure_limit} PSI, Temperatura: {temperature_limit} °C, Combustible: {fuel_level_limit} Litros"
+            return {"last_update": last_update, "monitoring_message": monitoring_message}
+        else:
+            return {"last_update": "No disponible", "monitoring_message": "No hay parámetros disponibles"}
+        
+    except Exception as e:
+        return {"last_update": "Error", "monitoring_message": f"Error al obtener parámetros: {str(e)}"}
+
+
+
 
 @app.route('/actualizar_precio_producto')
 def actualizar_precio_producto():
