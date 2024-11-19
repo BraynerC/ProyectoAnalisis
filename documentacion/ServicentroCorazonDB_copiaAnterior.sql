@@ -25,7 +25,7 @@ CREATE TABLE Usuarios (
     nombre_usuario NVARCHAR(50) UNIQUE NOT NULL,
     contrasena NVARCHAR(255) NOT NULL, 
     empleado_id INT NULL, 
-    rol NVARCHAR(50) DEFAULT 'Cliente',
+    rol NVARCHAR(50) DEFAULT 'Cliente', -- Constraint eliminado
     fecha_creacion DATETIME DEFAULT GETDATE(),
     estatus NVARCHAR(10) DEFAULT 'Activo' CHECK (estatus IN ('Activo', 'Inactivo'))
 );
@@ -39,7 +39,7 @@ CREATE TABLE Inventarios (
     fecha_ultima_actualizacion DATETIME DEFAULT GETDATE()
 );
 
-CREATE TABLE Proveedores (
+CREATE TABLE proveedores (
     id INT IDENTITY(1,1) PRIMARY KEY,      
     nombre_proveedor NVARCHAR(100) NOT NULL, 
     contacto NVARCHAR(100) NOT NULL,         
@@ -67,9 +67,7 @@ CREATE TABLE Devoluciones (
     venta_id INT,
     producto_id INT,
     cantidad INT,
-    fecha_devolucion DATETIME DEFAULT GETDATE(),
-    motivo NVARCHAR(255),
-    fecha_fin DATETIME
+    fecha_devolucion DATETIME DEFAULT GETDATE()
 );
 
 CREATE TABLE Mantenimiento (
@@ -84,8 +82,7 @@ CREATE TABLE Reabastecimiento_Gasolina (
     reabastecimiento_id INT PRIMARY KEY IDENTITY(1,1),
     cantidad DECIMAL(10, 2),
     fecha_solicitud DATETIME DEFAULT GETDATE(),
-    fecha_entrega DATE,
-    producto_id INT
+    fecha_entrega DATE
 );
 
 CREATE TABLE Servicios_Adicionales (
@@ -93,27 +90,21 @@ CREATE TABLE Servicios_Adicionales (
     tipo_servicio NVARCHAR(50) CHECK (tipo_servicio IN ('Lubricentro', 'Llantera')),
     descripcion NVARCHAR(MAX),
     fecha_servicio DATE,
-    empleado_id INT,
-    cliente_id INT
+    empleado_id INT
 );
 
 CREATE TABLE Reportes (
     reporte_id INT PRIMARY KEY IDENTITY(1,1),
     tipo_reporte NVARCHAR(100),
     fecha_generacion DATETIME DEFAULT GETDATE(),
-    contenido NVARCHAR(MAX),
-    usuario_id INT
+    contenido NVARCHAR(MAX)
 );
 
 CREATE TABLE Promociones (
     id INT PRIMARY KEY IDENTITY(1,1),
     nombre NVARCHAR(100) NOT NULL,
     detalles NVARCHAR(MAX),
-    fecha_creacion DATETIME DEFAULT GETDATE(),
-    descuento DECIMAL(5, 2), 
-    fecha_inicio DATETIME, 
-    fecha_fin DATETIME,
-    producto_id INT
+    fecha_creacion DATETIME DEFAULT GETDATE()
 );
 
 CREATE TABLE Parametros_Mantenimiento (
@@ -124,25 +115,6 @@ CREATE TABLE Parametros_Mantenimiento (
     fecha_actualizacion DATETIME DEFAULT GETDATE()
 );
 
--- CREACION DE TABLA CLIENTES
-CREATE TABLE Clientes (
-    cliente_id INT PRIMARY KEY IDENTITY(1,1),
-    nombre NVARCHAR(100),
-    telefono NVARCHAR(15),
-    email NVARCHAR(100)
-);
-
--- CREACION DE TABLA CITAS
-CREATE TABLE Citas (
-    cita_id INT PRIMARY KEY IDENTITY(1,1),
-    tipo_servicio VARCHAR(50),
-    descripcion TEXT,
-    fecha_servicio DATETIME,
-    estado VARCHAR(50) DEFAULT 'Pendiente',
-    cliente_nombre VARCHAR(100),
-    cliente_telefono VARCHAR(20),
-    cliente_email VARCHAR(100)
-);
 
 -- CREACION DE CLAVES FORANEAS
 ALTER TABLE Ventas
@@ -157,11 +129,29 @@ ADD FOREIGN KEY (venta_id) REFERENCES Ventas(venta_id),
     FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
 
 ALTER TABLE Servicios_Adicionales
-ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id),
-    FOREIGN KEY (cliente_id) REFERENCES Clientes(cliente_id);
+ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
 
 ALTER TABLE Reabastecimiento_Gasolina
-ADD FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
+ADD producto_id INT,
+	FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
+
+ALTER TABLE Mantenimiento
+ADD empleado_id INT,
+	FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
+
+ALTER TABLE Inventarios
+ADD restricciones INT NULL, 
+    descripcion NVARCHAR(MAX); 
+
+ALTER TABLE Promociones
+ADD descuento DECIMAL(5, 2), 
+    fecha_inicio DATETIME, 
+    fecha_fin DATETIME; 
+
+
+ALTER TABLE Devoluciones
+ADD motivo NVARCHAR(255),
+    fecha_fin DATETIME;
 
 ALTER TABLE Reportes
 ADD CONSTRAINT FK_UsuarioID
@@ -172,12 +162,49 @@ ADD CONSTRAINT FK_EmpleadoID
 FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
 
 ALTER TABLE Promociones
+ADD producto_id INT;
+
+ALTER TABLE Promociones
 ADD FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
 
 ALTER TABLE Inventarios
 ADD marca NVARCHAR(100);
 
 ALTER TABLE Proveedores
-ADD marca_id INT,
-    FOREIGN KEY (marca_id) REFERENCES Inventarios(producto_id);
+ADD marca_id INT;
+
+ALTER TABLE Proveedores
+ADD FOREIGN KEY (marca_id) REFERENCES Inventarios(producto_id);
+
+--Nuevo
+
+CREATE TABLE Clientes (
+    cliente_id INT PRIMARY KEY IDENTITY(1,1),
+    nombre NVARCHAR(100),
+    telefono NVARCHAR(15),
+    email NVARCHAR(100)
+);
+
+ALTER TABLE Servicios_Adicionales
+ADD cliente_id INT;
+
+CREATE TABLE Citas (
+    cita_id INT PRIMARY KEY IDENTITY(1,1),
+    tipo_servicio VARCHAR(50),
+    descripcion TEXT,
+    fecha_servicio DATETIME,
+    estado VARCHAR(50) DEFAULT 'Pendiente'
+);
+
+ALTER TABLE Citas
+ADD cliente_nombre VARCHAR(100),
+    cliente_telefono VARCHAR(20),
+    cliente_email VARCHAR(100);
+
+ALTER TABLE Promociones
+ADD producto_id INT;
+
+ALTER TABLE Citas
+DROP CONSTRAINT FK__Citas__cliente_i__5224328E;
+
 
