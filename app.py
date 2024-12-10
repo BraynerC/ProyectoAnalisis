@@ -140,9 +140,43 @@ def reportes_financieros():
 def cashier_functions():
     return render_template('cashier_functions.html')
 
-@app.route('/admin_functions')
+@app.route('/admin_functions', methods=['GET', 'POST'])
 def admin_functions():
-    return render_template('admin_functions.html')
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    if request.method == 'POST':
+        nombre_metodo = request.form.get('payment_method')
+        descripcion = request.form.get('description', '')
+
+        if not nombre_metodo:
+            flash('El nombre del método de pago es obligatorio.', 'error')
+            return redirect(url_for('admin_functions'))
+
+        try:
+            cursor.execute(
+                """
+                INSERT INTO Metodos_Pago (nombre_metodo, descripcion, estado)
+                VALUES (?, ?, 'Activo')
+                """,
+                (nombre_metodo, descripcion)
+            )
+            connection.commit()
+            flash('Método de pago añadido correctamente.', 'success')
+        except Exception as e:
+            flash(f'Error al añadir el método de pago: {e}', 'error')
+        finally:
+            cursor.close()
+            connection.close()
+        return redirect(url_for('admin_functions'))
+
+    cursor.execute("SELECT metodo_id, nombre_metodo, descripcion, estado FROM Metodos_Pago")
+    metodos_pago = cursor.fetchall()
+    cursor.close()
+    connection.close()
+
+    return render_template('admin_functions.html', metodos_pago=metodos_pago)
+
 
 @app.route('/configure_promotion')
 def configure_promotion():
@@ -291,6 +325,40 @@ def incidencias():
 @app.route('/gestion_servicios')
 def gestion_servicios():
     return render_template('gestion_servicios.html')
+
+@app.route('/nomina')
+def generar_reporte_nomina_pdf():
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    pdf.setTitle("Reporte de Nómina")
+
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    pdf.drawString(100, 800, "Reporte de Nómina - Servicentro Corazón de Jesús")
+    pdf.drawString(100, 780, f"Fecha de Generación: {fecha_generacion}")
+
+ 
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT empleado_id, nombre, salario_base, salario_base * 0.055 AS aporte_ccss, 
+               salario_base - (salario_base * 0.055) AS salario_neto
+        FROM Empleados
+    """)
+    empleados = cursor.fetchall()
+
+    y = 750
+    for empleado in empleados:
+        pdf.drawString(100, y, f"Empleado ID: {empleado.empleado_id}, Nombre: {empleado.nombre}, "
+                               f"Salario Base: ₡{empleado.salario_base}, Aporte a CCSS: ₡{empleado.aporte_ccss}, "
+                               f"Salario Neto: ₡{empleado.salario_neto}")
+        y -= 20
+
+    pdf.showPage()
+    pdf.save()
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name="reporte_nomina.pdf", mimetype='application/pdf')
+
 
 @app.route('/process_sale', methods=['POST'])
 def process_sale():

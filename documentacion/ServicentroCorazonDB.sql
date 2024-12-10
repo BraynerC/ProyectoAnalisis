@@ -16,6 +16,7 @@ CREATE TABLE Empleados (
     telefono NVARCHAR(15),
     direccion NVARCHAR(255),
     fecha_contratacion DATE,
+    salario_base INT,
     rol NVARCHAR(50) CHECK (rol IN ('Administrador', 'Gerente', 'Empleado', 'Tecnico', 'Mantenimiento')),
     estatus NVARCHAR(10) DEFAULT 'Activo' CHECK (estatus IN ('Activo', 'Inactivo'))
 );
@@ -163,6 +164,13 @@ CREATE TABLE reabastecimiento (
     cantidad FLOAT,
     fecha_solicitud DATETIME,
     fecha_entrega DATETIME
+);
+
+CREATE TABLE Metodos_Pago (
+    metodo_id INT PRIMARY KEY IDENTITY(1,1),
+    nombre_metodo NVARCHAR(100) NOT NULL,
+    descripcion NVARCHAR(255),
+    estado NVARCHAR(10) DEFAULT 'Activo' CHECK (estado IN ('Activo', 'Inactivo'))
 );
 
 -- CREACION DE CLAVES FORANEAS
