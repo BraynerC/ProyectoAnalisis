@@ -13,7 +13,11 @@ from flask import Flask, request, jsonify
 import pyodbc
 from datetime import datetime
 import pyodbc  
-
+from flask import Flask, render_template, request, make_response
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from datetime import datetime
+import io
 
 app = Flask(__name__)
 app.secret_key = 'Hola'
@@ -1021,6 +1025,107 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
+    remitente = "remitente.servicentrocj@gmail.com"
+    password = "wrcf yejw zkqv wqsb"
+    destinatario = correo_proveedor
+
+    asunto = "Alerta: Solicitud de reabastecimiento"
+    cuerpo = f"""
+    Estimado proveedor,
+
+    El nivel de gasolina para el tipo '{tipo_gasolina}' ha llegado al mínimo establecido.
+    Por favor, procese un reabastecimiento lo antes posible.
+
+    Saludos,
+    Gestión de Gasolinera
+    """
+
+    mensaje = MIMEMultipart()
+    mensaje['From'] = remitente
+    mensaje['To'] = destinatario
+    mensaje['Subject'] = asunto
+    mensaje.attach(MIMEText(cuerpo, 'plain'))
+
+    try:
+        servidor = smtplib.SMTP('smtp.gmail.com', 587)
+        servidor.starttls()
+        servidor.login(remitente, password)
+        servidor.send_message(mensaje)
+        servidor.quit()
+        print("Correo enviado exitosamente")
+    except Exception as e:
+        print(f"Error enviando el correo: {e}")
+
+# Lista para almacenar las incidencias
+incidencias = []
+
+# Página principal para registrar incidencias
+@app.route('/')
+def index():
+    return render_template('incidencias.html', incidencias=incidencias)
+
+# Ruta para registrar una incidencia
+@app.route('/registrar_incidencia', methods=['POST'])
+def registrar_incidencia():
+    try:
+        tipo_incidencia = request.form['tipo_incidencia']
+        descripcion = request.form['descripcion']
+        # Agregar incidencia a la lista global
+        incidencias.append({
+            'tipo': tipo_incidencia,
+            'descripcion': descripcion,
+            'fecha': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        print("Incidencias actuales:", incidencias)  
+        return render_template('incidencias.html', incidencias=incidencias)
+    except Exception as e:
+        print(f"Error al registrar incidencia: {e}")
+        return render_template('incidencias.html', incidencias=incidencias)
+    
+# Ruta para generar el reporte de incidencias en PDF
+@app.route('/generar_reporte_incidencias')
+def generar_reporte():
+    buffer = io.BytesIO()
+
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Título del reporte
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, height - 50, "Reporte de Incidencias")
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(50, height - 80, f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    # Encabezados de la tabla
+    y = height - 120
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(50, y, "Tipo de Incidencia")
+    pdf.drawString(200, y, "Descripción")
+    pdf.drawString(400, y, "Fecha")
+
+    # Contenido de las incidencias
+    pdf.setFont("Helvetica", 10)
+    for incidencia in incidencias:
+        y -= 20
+        if y < 50:  # Salto de página si el contenido supera el límite
+            pdf.showPage()
+            pdf.setFont("Helvetica", 10)
+            y = height - 50
+        pdf.drawString(50, y, incidencia['tipo'])
+        pdf.drawString(200, y, incidencia['descripcion'][:50])  # Truncar descripciones largas
+        pdf.drawString(400, y, incidencia['fecha'])
+
+    pdf.save()
+    buffer.seek(0)
+
+    # Retornar el PDF como respuesta HTTP
+    response = make_response(buffer.read())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=reporte_incidencias.pdf'
+    return response
+
+# Función para enviar alertas por correo
 def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
     remitente = "remitente.servicentrocj@gmail.com"
     password = "wrcf yejw zkqv wqsb"
