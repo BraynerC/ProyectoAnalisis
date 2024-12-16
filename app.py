@@ -922,7 +922,6 @@ def consultar_citas():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Obtener todas las citas programadas
     cursor.execute("""
         SELECT cita_id, tipo_servicio, descripcion, fecha_servicio, estado, cliente_nombre, cliente_telefono, cliente_email
         FROM Citas
@@ -935,7 +934,6 @@ def consultar_citas():
 
     return render_template('consultar_citas.html', citas=citas)
 
-# Rutas relacionadas con la venta de gasolina
 @app.route('/gestion_gasolina')
 def gestion_gasolina():
     return render_template('gestion_gasolina.html')
@@ -951,14 +949,12 @@ def venta_gasolina():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Actualiza la cantidad de gasolina en la base de datos
         cursor.execute("""
             UPDATE gasolina
             SET cantidad_litros = cantidad_litros - ?
             WHERE tipo = ?
         """, litros_vendidos, tipo_gasolina)
         
-        # Verifica si el nivel está por debajo del mínimo
         cursor.execute("SELECT cantidad_litros, minimo_litros FROM gasolina WHERE tipo = ?", tipo_gasolina)
         gasolina = cursor.fetchone()
         
@@ -969,7 +965,6 @@ def venta_gasolina():
         conn.close()
         return redirect('/alertas')
 
-# Rutas relacionadas con el reabastecimiento
 @app.route('/reabastecer', methods=['GET', 'POST'])
 def reabastecer():
     if request.method == 'GET':
@@ -1000,13 +995,12 @@ def reabastecer():
         conn.close()
         return redirect('/')
 
-# Ruta para mostrar las alertas
 @app.route('/alertas', methods=['GET', 'POST'])
 def alertas():
     if request.method == 'POST':
         tipo_gasolina = request.form['tipo_gasolina']
         enviar_alerta_correo(tipo_gasolina, "destinario.servicentrocj@gmail.com" )
-        return redirect('/alertas')  # Redirige a la página de alertas después de enviar el correo
+        return redirect('/alertas') 
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -1020,7 +1014,6 @@ def alertas():
 
     return render_template('alertas.html', alertas=alertas)
 
-# Función para enviar alertas por correo
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -1057,21 +1050,17 @@ def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
     except Exception as e:
         print(f"Error enviando el correo: {e}")
 
-# Lista para almacenar las incidencias
 incidencias = []
 
-# Página principal para registrar incidencias
 @app.route('/')
 def index():
     return render_template('incidencias.html', incidencias=incidencias)
 
-# Ruta para registrar una incidencia
 @app.route('/registrar_incidencia', methods=['POST'])
 def registrar_incidencia():
     try:
         tipo_incidencia = request.form['tipo_incidencia']
         descripcion = request.form['descripcion']
-        # Agregar incidencia a la lista global
         incidencias.append({
             'tipo': tipo_incidencia,
             'descripcion': descripcion,
@@ -1083,7 +1072,6 @@ def registrar_incidencia():
         print(f"Error al registrar incidencia: {e}")
         return render_template('incidencias.html', incidencias=incidencias)
     
-# Ruta para generar el reporte de incidencias en PDF
 @app.route('/generar_reporte_incidencias')
 def generar_reporte():
     buffer = io.BytesIO()
@@ -1091,41 +1079,36 @@ def generar_reporte():
     pdf = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
 
-    # Título del reporte
     pdf.setFont("Helvetica-Bold", 16)
     pdf.drawString(50, height - 50, "Reporte de Incidencias")
     pdf.setFont("Helvetica", 12)
     pdf.drawString(50, height - 80, f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    # Encabezados de la tabla
     y = height - 120
     pdf.setFont("Helvetica-Bold", 12)
     pdf.drawString(50, y, "Tipo de Incidencia")
     pdf.drawString(200, y, "Descripción")
     pdf.drawString(400, y, "Fecha")
 
-    # Contenido de las incidencias
     pdf.setFont("Helvetica", 10)
     for incidencia in incidencias:
         y -= 20
-        if y < 50:  # Salto de página si el contenido supera el límite
+        if y < 50:  
             pdf.showPage()
             pdf.setFont("Helvetica", 10)
             y = height - 50
         pdf.drawString(50, y, incidencia['tipo'])
-        pdf.drawString(200, y, incidencia['descripcion'][:50])  # Truncar descripciones largas
+        pdf.drawString(200, y, incidencia['descripcion'][:50])  
         pdf.drawString(400, y, incidencia['fecha'])
 
     pdf.save()
     buffer.seek(0)
 
-    # Retornar el PDF como respuesta HTTP
     response = make_response(buffer.read())
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'inline; filename=reporte_incidencias.pdf'
     return response
 
-# Función para enviar alertas por correo
 def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
     remitente = "remitente.servicentrocj@gmail.com"
     password = "wrcf yejw zkqv wqsb"
