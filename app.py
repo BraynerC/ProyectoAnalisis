@@ -460,18 +460,25 @@ def generar_reporte_nomina_pdf():
     connection = get_db_connection()
     cursor = connection.cursor()
     cursor.execute("""
-        SELECT empleado_id, nombre, salario_base, salario_base * 0.055 AS aporte_ccss, 
-               salario_base - (salario_base * 0.055) AS salario_neto
-        FROM Empleados
+    SELECT empleado_id, nombre, salario_base, salario_base * 0.055 AS aporte_ccss, 
+           salario_base - (salario_base * 0.055) AS salario_neto
+    FROM Empleados
     """)
     empleados = cursor.fetchall()
 
     y = 750
     for empleado in empleados:
-        pdf.drawString(100, y, f"Empleado ID: {empleado.empleado_id}, Nombre: {empleado.nombre}, "
-                               f"Salario Base: ₡{empleado.salario_base}, Aporte a CCSS: ₡{empleado.aporte_ccss}, "
-                               f"Salario Neto: ₡{empleado.salario_neto}")
-        y -= 20
+        empleado_id = empleado[0] 
+        nombre = empleado[1]  
+        salario_base = empleado[2]  
+        aporte_ccss = empleado[3]  
+        salario_neto = empleado[4]  
+
+    pdf.drawString(100, y, f"Empleado ID: {empleado_id}, Nombre: {nombre}, "
+                           f"Salario Base: ₡{salario_base}, Aporte a CCSS: ₡{aporte_ccss}, "
+                           f"Salario Neto: ₡{salario_neto}")
+    y -= 20
+
 
     pdf.showPage()
     pdf.save()
