@@ -45,11 +45,7 @@
               </li>
               {% endif %} {% if session['user_roles'] %} {% if 'Administrador'
               in session['user_roles'] %}
-              <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('reabastecimiento') }}"
-                  >Reabastecimiento Automatizado</a
-                >
-              </li>
+            
               {% endif %} {% if 'Administrador' in session['user_roles'] %}
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('EMP') }}"

@@ -7,14 +7,6 @@
 <div class="container">
     <h2 class="mt-4 mb-4">Configurar Umbrales de Gasolina</h2>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
     <div class="alert alert-info mt-3" role="alert">
         Asegúrese de que las cantidades estén dentro de los rangos permitidos para cada tipo de gasolina.
     </div>
