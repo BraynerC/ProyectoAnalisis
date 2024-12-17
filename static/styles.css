@@ -60,7 +60,7 @@ body::before {
 }
 
 .sidebar .nav-link:hover {
-    background-color: #007bff;
+    background-color: #ff0000d9;
     color: white;
 }
 
