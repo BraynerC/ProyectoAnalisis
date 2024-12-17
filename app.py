@@ -1234,9 +1234,6 @@ def vacaciones():
     solicitudes = obtener_solicitudes_vacaciones(f"empleado_id = {usuario_id}")
     return render_template('vacaciones.html', solicitudes=solicitudes)
 
-
-
-
 @app.route('/gestionar_vacaciones', methods=['GET', 'POST'])
 @requiere_autenticacion
 def gestionar_vacaciones():
@@ -1254,7 +1251,6 @@ def gestionar_vacaciones():
     solicitudes = obtener_solicitudes_vacaciones()
     return render_template('gestionar_vacaciones.html', solicitudes=solicitudes)
 
-
 def obtener_solicitudes_vacaciones(filtro=None):
     query = "SELECT solicitud_id, empleado_id, fecha_inicio, fecha_fin, estatus, fecha_solicitud, comentario FROM Solicitudes_Vacaciones"
     params = ()  
@@ -1263,15 +1259,12 @@ def obtener_solicitudes_vacaciones(filtro=None):
         return []
     return solicitudes
 
-
-
 def insertar_solicitud_vacaciones(usuario_id, fecha_inicio, fecha_fin):
     query = """
         INSERT INTO Solicitudes_Vacaciones (empleado_id, fecha_inicio, fecha_fin)
         VALUES (?, ?, ?)
     """
     return execute_query(query, (usuario_id, fecha_inicio, fecha_fin), fetch=False)
-
 
 def actualizar_estado_solicitud(solicitud_id, estatus, comentario=''):
     query = """
@@ -1280,7 +1273,6 @@ def actualizar_estado_solicitud(solicitud_id, estatus, comentario=''):
         WHERE solicitud_id = ?
     """
     return execute_query(query, (estatus, comentario, solicitud_id), fetch=False)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
