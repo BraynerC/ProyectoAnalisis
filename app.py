@@ -64,6 +64,11 @@ def requiere_rol(roles_permitidos):
         return decorada
     return decorador
 
+@app.route('/error_en_desarrollo')
+def error_en_desarrollo():
+    return render_template('error.html', mensaje="Esta funcionalidad está en desarrollo. Inténtalo más tarde.")
+
+
 @app.route('/')
 @requiere_autenticacion
 def home():
@@ -124,6 +129,80 @@ def convertir_empleado(usuario_id):
             flash(f'Error al convertir usuario en empleado: {str(e)}', 'danger')
 
         return redirect(url_for('ingreso_empleado'))
+
+@app.route('/evaluar_desempeno', methods=['GET', 'POST'])
+def evaluar_desempeno():
+    if 'Administrador' not in session['user_roles'] and 'Gerente' not in session['user_roles']:
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT Usuario.Id, Usuario.Nombre 
+        FROM Usuario
+        INNER JOIN Rol ON Usuario.RolId = Rol.Id
+        WHERE Rol.Nombre IN ('Empleado', 'Gerente')
+    """)
+    usuarios = cursor.fetchall()
+
+    if request.method == 'POST':
+        empleado_id = request.form['user_id']
+        empleado_nombre = request.form['user_name']
+        puntuacion = request.form['puntuacion']
+        comentarios = request.form['comentarios']
+
+        cursor.execute("""
+            INSERT INTO Evaluaciones (EmpleadoId, EmpleadoNombre, Puntuacion, Comentarios)
+            VALUES (?, ?, ?, ?)
+        """, (empleado_id, empleado_nombre, puntuacion, comentarios))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn.close()
+    return render_template('evaluar_desempeno.html', usuarios=usuarios)
+
+
+
+@app.route('/actualizar_evaluacion/<int:evaluacion_id>', methods=['GET', 'POST'])
+def actualizar_evaluacion(evaluacion_id):
+    if 'Administrador' not in session['user_roles'] and 'Gerente' not in session['user_roles']:
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM Evaluaciones WHERE Id = ?", (evaluacion_id,))
+    evaluacion = cursor.fetchone()
+
+    cursor.execute("""
+        SELECT Usuario.Id, Usuario.Nombre 
+        FROM Usuario
+        INNER JOIN Rol ON Usuario.RolId = Rol.Id
+        WHERE Rol.Nombre IN ('Empleado', 'Gerente')
+    """)
+    usuarios = cursor.fetchall()
+
+    if request.method == 'POST':
+        empleado_id = request.form['user_id']
+        empleado_nombre = request.form['user_name']
+        puntuacion = request.form['puntuacion']
+        comentarios = request.form['comentarios']
+
+        cursor.execute("""
+            UPDATE Evaluaciones
+            SET EmpleadoId = ?, EmpleadoNombre = ?, Puntuacion = ?, Comentarios = ?
+            WHERE Id = ?
+        """, (empleado_id, empleado_nombre, puntuacion, comentarios, evaluacion_id))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn.close()
+    return render_template('actualizar_evaluacion.html', evaluacion=evaluacion, usuarios=usuarios)
 
 
 

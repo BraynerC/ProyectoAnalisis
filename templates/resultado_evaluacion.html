@@ -12,20 +12,20 @@
                 <th>Empleado</th>
                 <th>Puntuación</th>
                 <th>Comentarios</th>
-                {% if current_user.rol in ['Administrador', 'Gerente'] %}
+                {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
                     <th>Acciones</th>
                 {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for evaluacion in evaluaciones %}
-                {% if current_user.rol in ['Administrador', 'Gerente'] or current_user.empleado_id == evaluacion.empleado_id %}
+                {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] or session['empleado_id'] == evaluacion.empleado_id %}
                     <tr>
                         <td>{{ evaluacion.id }}</td>
                         <td>{{ evaluacion.empleado_nombre }}</td>
                         <td>{{ evaluacion.puntuacion }}</td>
                         <td>{{ evaluacion.comentarios }}</td>
-                        {% if current_user.rol in ['Administrador', 'Gerente'] %}
+                        {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
                             <td>
                                 <a href="{{ url_for('actualizar_evaluacion', evaluacion_id=evaluacion.id) }}" class="btn btn-yellow">Editar</a>
                             </td>
@@ -36,7 +36,7 @@
         </tbody>
     </table>
 
-    {% if current_user.rol in ['Administrador', 'Gerente'] %}
+    {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
         <a href="{{ url_for('evaluar_desempeno') }}" class="btn btn-orange">Evaluar</a>
     {% endif %}
 {% endblock %}

@@ -222,3 +222,13 @@ ALTER TABLE Proveedores
 ADD marca_id INT,
     FOREIGN KEY (marca_id) REFERENCES Inventarios(producto_id);
 
+--Nuevo--
+
+CREATE TABLE Evaluaciones (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    EmpleadoId INT NOT NULL,
+    EmpleadoNombre NVARCHAR(100) NOT NULL,
+    Puntuacion INT NOT NULL,
+    Comentarios NVARCHAR(MAX),
+    FechaEvaluacion DATETIME DEFAULT GETDATE()
+);
