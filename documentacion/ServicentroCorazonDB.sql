@@ -152,6 +152,18 @@ CREATE TABLE gasolina (
     minimo_litros FLOAT 
 );
 
+CREATE TABLE Solicitudes_Vacaciones (
+    solicitud_id INT PRIMARY KEY IDENTITY(1,1),
+    empleado_id INT NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    estatus NVARCHAR(20) DEFAULT 'Pendiente' CHECK (estatus IN ('Pendiente', 'Aprobado', 'Rechazado')),
+    fecha_solicitud DATETIME DEFAULT GETDATE(),
+    comentario NVARCHAR(255) NULL,
+    FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id)
+);
+
+
 INSERT INTO gasolina (tipo, cantidad_litros, minimo_litros)
 VALUES 
     ('Gasolina Super', 5000, 1000),

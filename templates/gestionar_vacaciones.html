@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestionar Solicitudes de Vacaciones{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Gestionar Solicitudes de Vacaciones</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID Solicitud</th>
+                <th>ID Empleado</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+                <th>Estatus</th>
+                <th>Comentario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitud in solicitudes %}
+            <tr>
+                <td>{{ solicitud[0] }}</td>
+                <td>{{ solicitud[1] }}</td>
+                <td>{{ solicitud[2] }}</td>
+                <td>{{ solicitud[3] }}</td>
+                <td>{{ solicitud[4] }}</td>
+                <td>{{ solicitud[6] or 'N/A' }}</td>
+                <td>
+                    <form method="POST">
+                        <input type="hidden" name="solicitud_id" value="{{ solicitud[0] }}">
+                        <select name="estatus" class="form-control">
+                            <option value="Aprobado">Aprobar</option>
+                            <option value="Rechazado">Rechazar</option>
+                        </select>
+                        <input type="text" name="comentario" placeholder="Comentario" class="form-control mt-2">
+                        <button type="submit" class="btn btn-success mt-2">Actualizar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

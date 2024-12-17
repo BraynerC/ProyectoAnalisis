@@ -1,21 +1,15 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
-from reportlab.lib.pagesizes import A4
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify, make_response
+from reportlab.lib.pagesizes import A4, letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
-from flask import jsonify
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from flask import Flask, request, jsonify
 import pyodbc
 from datetime import datetime
-import pyodbc  
-from flask import Flask, render_template, request, make_response
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from datetime import datetime
 import io
 
@@ -1140,6 +1134,80 @@ def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
         print("Correo enviado exitosamente")
     except Exception as e:
         print(f"Error enviando el correo: {e}")
+
+
+
+
+@app.route('/vacaciones', methods=['GET', 'POST'])
+@requiere_autenticacion
+def vacaciones():
+    usuario_id = session.get('usuario_id')  # Obtener ID del usuario logueado
+    
+    # Obtener el empleado_id asociado
+    empleado = execute_query("SELECT empleado_id FROM Usuarios WHERE usuario_id = ?", (usuario_id,))
+    if not empleado or not empleado[0][0]:
+        flash("Error: El usuario no está asociado a un empleado válido.", "danger")
+        return redirect(url_for('index'))
+    
+    empleado_id = empleado[0][0]
+
+    # Continuar con la lógica de solicitudes
+    if request.method == 'POST':
+        fecha_inicio = request.form['fecha_inicio']
+        fecha_fin = request.form['fecha_fin']
+        insertar_solicitud_vacaciones(empleado_id, fecha_inicio, fecha_fin)
+        flash('Solicitud de vacaciones enviada correctamente.', 'success')
+        return redirect(url_for('vacaciones'))
+
+    solicitudes = obtener_solicitudes_vacaciones(f"empleado_id = {empleado_id}")
+    return render_template('vacaciones.html', solicitudes=solicitudes)
+
+
+
+
+@app.route('/gestionar_vacaciones', methods=['GET', 'POST'])
+@requiere_autenticacion
+def gestionar_vacaciones():
+    if not any(rol in ['Gerente', 'Administrador'] for rol in obtener_roles(session['usuario_id'])):
+      flash('No tienes permisos para acceder a esta página.', 'danger')
+      return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        solicitud_id = request.form['solicitud_id']
+        estatus = request.form['estatus']
+        comentario = request.form['comentario']
+        actualizar_estado_solicitud(solicitud_id, estatus, comentario)
+        flash('Solicitud actualizada correctamente.', 'success')
+
+    solicitudes = obtener_solicitudes_vacaciones()
+    return render_template('gestionar_vacaciones.html', solicitudes=solicitudes)
+
+
+def obtener_solicitudes_vacaciones(filtro=None):
+    query = "SELECT solicitud_id, empleado_id, fecha_inicio, fecha_fin, estatus, fecha_solicitud, comentario FROM Solicitudes_Vacaciones"
+    params = ()
+    if filtro:
+        query += " WHERE " + filtro
+        params = tuple(params)
+    return execute_query(query)
+
+
+def insertar_solicitud_vacaciones(empleado_id, fecha_inicio, fecha_fin):
+    query = """
+        INSERT INTO Solicitudes_Vacaciones (empleado_id, fecha_inicio, fecha_fin)
+        VALUES (?, ?, ?)
+    """
+    return execute_query(query, (empleado_id, fecha_inicio, fecha_fin), fetch=False)
+
+
+def actualizar_estado_solicitud(solicitud_id, estatus, comentario=''):
+    query = """
+        UPDATE Solicitudes_Vacaciones 
+        SET estatus = ?, comentario = ? 
+        WHERE solicitud_id = ?
+    """
+    return execute_query(query, (estatus, comentario, solicitud_id), fetch=False)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
