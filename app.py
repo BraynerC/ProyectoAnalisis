@@ -341,10 +341,7 @@ def configure_payment_method():
 def reabastecimiento():
     return render_template('reabastecimiento.html')
 
-@app.route('/configurar_umbrales')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico'])
-def configurar_umbrales():
-    return render_template('configurar_umbrales.html')
+
 
 @app.route('/solicitud_reabastecimiento')
 @requiere_rol(['Administrador', 'Gerente', 'Tecnico'])
@@ -1182,8 +1179,41 @@ def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
     except Exception as e:
         print(f"Error enviando el correo: {e}")
 
+#Configurar umbrales gasolina
+@app.route('/configurar_umbrales', methods=['GET', 'POST'])
+def configurar_umbrales():
+    if request.method == 'POST':
+        tipo = request.form['tipo']
+        minimo_litros = int(request.form['minimo_litros'])
+        maximo_litros = int(request.form['maximo_litros'])
 
+        # Validaciones
+        if minimo_litros < 1000 or minimo_litros > 5000:
+            flash("El mínimo de litros debe estar entre 1000 y 5000.", "danger")
+            return redirect(url_for('configurar_umbrales'))
+        if maximo_litros < 8000 or maximo_litros > 10000:
+            flash("El máximo de litros debe estar entre 8000 y 10000.", "danger")
+            return redirect(url_for('configurar_umbrales'))
 
+        try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                query = """
+                    UPDATE dbo.gasolina 
+                    SET minimo_litros = ?, maximo_litros = ? 
+                    WHERE tipo = ?
+                """
+                cursor.execute(query, (minimo_litros, maximo_litros, tipo))
+                conn.commit()
+                flash("Umbrales configurados correctamente.", "success")
+        except Exception as e:
+            flash(f"Error al actualizar los umbrales: {e}", "danger")
+        
+        return redirect(url_for('configurar_umbrales'))
+    
+    return render_template('configurar_umbrales.html')
+
+#Vacaciones
 @app.route('/vacaciones', methods=['GET', 'POST'])
 @requiere_autenticacion
 def vacaciones():
