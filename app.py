@@ -82,6 +82,52 @@ def logout():
 def about():
     return render_template('about.html')
 
+@app.route('/ingreso_empleado', methods=['GET'])
+def ingreso_empleado():
+    usuarios = execute_query('''
+        SELECT usuario_id, nombre_usuario, rol, estatus, fecha_creacion
+        FROM Usuarios
+        WHERE rol = 'Pendiente' OR estatus = 'Inactivo'
+    ''')
+    return render_template('ingreso_empleado.html', usuarios=usuarios)
+
+@app.route('/convertir_empleado/<int:usuario_id>', methods=['POST'])
+def convertir_empleado(usuario_id):
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellido = request.form['apellido']
+        email = request.form['email']
+        telefono = request.form['telefono']
+        direccion = request.form['direccion']
+        fecha_contratacion = request.form['fecha_contratacion']
+
+        print(f"usuario_id recibido: {usuario_id}")
+
+        try:
+            execute_query('''
+                INSERT INTO Empleados (nombre, apellido, email, telefono, direccion, fecha_contratacion, rol, estatus)
+                VALUES (?, ?, ?, ?, ?, ?, 'Empleado', 'Activo')
+            ''', (nombre, apellido, email, telefono, direccion, fecha_contratacion))
+
+            nuevo_empleado_id = execute_query('SELECT SCOPE_IDENTITY()')[0][0]
+
+            print(f"Nuevo Empleado ID: {nuevo_empleado_id}")
+
+            execute_query('''
+                UPDATE Usuarios
+                SET empleado_id = ?, rol = 'Empleado', estatus = 'Activo'
+                WHERE usuario_id = ?
+            ''', (nuevo_empleado_id, usuario_id))
+
+            flash('Usuario convertido en empleado exitosamente.', 'success')
+        except Exception as e:
+            flash(f'Error al convertir usuario en empleado: {str(e)}', 'danger')
+
+        return redirect(url_for('ingreso_empleado'))
+
+
+
+
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
@@ -670,7 +716,6 @@ def autenticacion():
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        email = request.form['email']
         password = request.form['password']
 
         user = execute_query('SELECT * FROM Usuarios WHERE nombre_usuario = ?', (username,))
@@ -681,15 +726,20 @@ def register():
         hashed_password = generate_password_hash(password)
 
         try:
-            execute_query('''INSERT INTO Usuarios (nombre_usuario, contrasena, rol, estatus)
-                              VALUES (?, ?, 'Administrador', 'Activo')''', (username, hashed_password))
-            flash('Usuario registrado exitosamente', 'success')
+            execute_query('''
+                INSERT INTO Usuarios (nombre_usuario, contrasena, rol, fecha_creacion, estatus)
+                VALUES (?, ?, 'Pendiente', GETDATE(), 'Inactivo')
+            ''', (username, hashed_password))
+
+            flash('Usuario registrado exitosamente. ', 'success')
             return redirect(url_for('autenticacion'))
+
         except Exception as e:
             flash(f'Error al registrar el usuario: {str(e)}', 'danger')
             return redirect(url_for('register'))
 
     return render_template('register.html')
+
 
 @app.route('/reset_password')
 def reset_password():
@@ -878,14 +928,12 @@ def programar_cita():
         cliente_telefono = request.form['cliente_telefono']
         cliente_email = request.form['cliente_email']
 
-        # Convertir la fecha desde el formato string a datetime
         try:
             fecha_servicio = datetime.strptime(fecha_servicio_str, '%Y-%m-%dT%H:%M')
         except ValueError:
             flash("La fecha proporcionada no es válida. Intente nuevamente.", 'error')
             return redirect(url_for('programar_cita'))
 
-        # Verificar disponibilidad
         cursor.execute("""
             SELECT COUNT(*) 
             FROM Citas 
@@ -897,7 +945,6 @@ def programar_cita():
             flash('Ya existe una cita programada para ese horario.', 'error')
             return redirect(url_for('programar_cita'))
 
-        # Registrar cita con los datos del cliente
         cursor.execute("""
             INSERT INTO Citas (tipo_servicio, descripcion, fecha_servicio, cliente_nombre, cliente_telefono, cliente_email) 
             VALUES (?, ?, ?, ?, ?, ?);
@@ -1137,29 +1184,24 @@ def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
 
 
 
-
 @app.route('/vacaciones', methods=['GET', 'POST'])
 @requiere_autenticacion
 def vacaciones():
-    usuario_id = session.get('usuario_id')  # Obtener ID del usuario logueado
-    
-    # Obtener el empleado_id asociado
-    empleado = execute_query("SELECT empleado_id FROM Usuarios WHERE usuario_id = ?", (usuario_id,))
-    if not empleado or not empleado[0][0]:
-        flash("Error: El usuario no está asociado a un empleado válido.", "danger")
+    usuario_id = session.get('usuario_id')  
+    usuario = execute_query("SELECT rol FROM Usuarios WHERE usuario_id = ?", (usuario_id,))
+    if not usuario or usuario[0][0] != 'Empleado':
+        flash("Error: El usuario no tiene el rol de 'Empleado'.", "danger")
         return redirect(url_for('index'))
     
-    empleado_id = empleado[0][0]
-
-    # Continuar con la lógica de solicitudes
     if request.method == 'POST':
         fecha_inicio = request.form['fecha_inicio']
         fecha_fin = request.form['fecha_fin']
-        insertar_solicitud_vacaciones(empleado_id, fecha_inicio, fecha_fin)
+        
+        insertar_solicitud_vacaciones(usuario_id, fecha_inicio, fecha_fin)
         flash('Solicitud de vacaciones enviada correctamente.', 'success')
         return redirect(url_for('vacaciones'))
 
-    solicitudes = obtener_solicitudes_vacaciones(f"empleado_id = {empleado_id}")
+    solicitudes = obtener_solicitudes_vacaciones(f"empleado_id = {usuario_id}")
     return render_template('vacaciones.html', solicitudes=solicitudes)
 
 
@@ -1185,19 +1227,20 @@ def gestionar_vacaciones():
 
 def obtener_solicitudes_vacaciones(filtro=None):
     query = "SELECT solicitud_id, empleado_id, fecha_inicio, fecha_fin, estatus, fecha_solicitud, comentario FROM Solicitudes_Vacaciones"
-    params = ()
-    if filtro:
-        query += " WHERE " + filtro
-        params = tuple(params)
-    return execute_query(query)
+    params = ()  
+    solicitudes = execute_query(query, params)
+    if solicitudes is None:
+        return []
+    return solicitudes
 
 
-def insertar_solicitud_vacaciones(empleado_id, fecha_inicio, fecha_fin):
+
+def insertar_solicitud_vacaciones(usuario_id, fecha_inicio, fecha_fin):
     query = """
         INSERT INTO Solicitudes_Vacaciones (empleado_id, fecha_inicio, fecha_fin)
         VALUES (?, ?, ?)
     """
-    return execute_query(query, (empleado_id, fecha_inicio, fecha_fin), fetch=False)
+    return execute_query(query, (usuario_id, fecha_inicio, fecha_fin), fetch=False)
 
 
 def actualizar_estado_solicitud(solicitud_id, estatus, comentario=''):

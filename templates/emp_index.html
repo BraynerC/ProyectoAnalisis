@@ -1,17 +1,33 @@
-{% extends 'base.html' %}
-
-{% block title %}Gestión de Empleados{% endblock %}
-{% set show_navigation = true %}
-{% block content %}
-    <div class="container">
-        <h2>Gestión de Empleados</h2>
-        <p></p>
-        <div class="btn-group-vertical" role="group" aria-label="Gestión de Empleados">
-            <a href="{{ url_for('vacaciones') }}" class="btn btn-orange">Solicitar Vacaciones</a>
-            <a href="{{ url_for('gestionar_vacaciones') }}" class="btn btn-yellow">Ver Solicitudes</a>    
-            <a href="{{ url_for('resultado_evaluacion') }}" class="btn btn-orange">Evaluaciones de Desempeño</a>
-            <a href="{{ url_for('consultar_ventas') }}" class="btn btn-yellow">Consultar Ventas</a>
-            <a href="{{ url_for('generar_reporte_nomina_pdf') }}" class="btn btn-green">Calcular Nómina</a>
-        </div>
-    </div>
+{% extends 'base.html' %} {% block title %}Gestión de Empleados{% endblock %} {%
+set show_navigation = true %} {% block content %}
+<div class="container">
+  <h2>Gestión de Empleados</h2>
+  <p></p>
+  <div
+    class="btn-group-vertical"
+    role="group"
+    aria-label="Gestión de Empleados"
+  >
+    <a href="{{ url_for('vacaciones') }}" class="btn btn-orange"
+      >Solicitar Vacaciones</a
+    >
+    {% if 'Administrador' in session['user_roles'] %}
+    <a href="{{ url_for('gestionar_vacaciones') }}" class="btn btn-yellow"
+      >Ver Solicitudes</a
+    >
+    <a href="{{ url_for('resultado_evaluacion') }}" class="btn btn-orange"
+      >Evaluaciones de Desempeño</a
+    >
+    <a href="{{ url_for('consultar_ventas') }}" class="btn btn-yellow"
+      >Consultar Ventas</a
+    >
+    <a href="{{ url_for('ingreso_empleado') }}" class="btn btn-yellow"
+      >ingresar Empleado</a
+    >
+    <a href="{{ url_for('generar_reporte_nomina_pdf') }}" class="btn btn-green"
+      >Calcular Nómina</a
+    >
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

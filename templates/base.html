@@ -1,117 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Servicentro Corazón de Jesús{% endblock %}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <header class="header">
-        <nav class="navbar navbar-expand-lg">
-            <a class="navbar-brand" href="{{ url_for('home') }}">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Servicentro Corazón de Jesús" height="120">
-            </a>
-        </nav>
-    </header>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Barra lateral -->
-            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-                <div class="sidebar-sticky">
-                    <h4 class="sidebar-title">Módulos</h4>
-                    <ul class="nav flex-column">
-                        {% if 'usuario_id' not in session %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('autenticacion') }}">Autenticación</a>
-                        </li>
-                        {% endif %}
-                        {% if session['user_roles'] %}
-                        {% if 'Administrador' in session['user_roles'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('reabastecimiento') }}">Reabastecimiento Automatizado</a>
-                        </li>
-                        {% endif %}
-                        {% if 'Administrador' in session['user_roles'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('EMP') }}">Gestión de Empleados</a>
-                        </li>
-                        {% endif %}
-                        {% if 'Administrador' in session['user_roles'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('gestion_servicios') }}">Servicios Adicionales</a>
-                        </li>
-                        {% endif %}
-                        {% if 'Administrador' in session['user_roles'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('ADT') }}">Administración de Tienda</a>
-                        </li>
-                        {% endif %}
-                        {% if 'Administrador' in session['user_roles'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('gestion_gasolina') }}">Gestión de Gasolina</a>
-                        </li>
-                        {% endif %}
-                        {% if 'Administrador' in session['user_roles'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('pre_ventas') }}">Ventas</a>
-                        </li>
-                        {% endif %}
-                        {% if 'Administrador' in session['user_roles'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('mantenimiento') }}">Mantenimiento Predictivo</a>
-                        </li>
-                        {% endif %}
-                        {% endif %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('contact') }}">Contactos</a>
-                        </li>
-                        {% if 'usuario_id' in session %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Desconectarse</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                    
-                </div>
-            </nav>
-            
-            <!-- Contenido principal -->
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div class="alert alert-dismissible fade show" role="alert">
-                            <ul>
-                            {% for category, message in messages %}
-                                <li class="alert alert-{{ category }}">{{ message }}</li>
-                            {% endfor %}
-                            </ul>
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    {% endif %}
-                {% endwith %}
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-                <div class="container mt-5">
-                    {% block content %}{% endblock %}
-                </div>
-            </main>
-        </div>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <header class="header">
+      <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+          <img
+            src="{{ url_for('static', filename='img/logo.png') }}"
+            alt="Servicentro Corazón de Jesús"
+            height="120"
+          />
+        </a>
+      </nav>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+          <div class="sidebar-sticky">
+            <h4 class="sidebar-title">Módulos</h4>
+            <ul class="nav flex-column">
+              {% if 'usuario_id' not in session %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('autenticacion') }}"
+                  >Autenticación</a
+                >
+              </li>
+              {% endif %} {% if session['user_roles'] %} {% if 'Administrador'
+              in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('reabastecimiento') }}"
+                  >Reabastecimiento Automatizado</a
+                >
+              </li>
+              {% endif %} {% if 'Administrador' in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('EMP') }}"
+                  >Gestión de Empleados</a
+                >
+              </li>
+              {% endif %} {% if 'Empleado' in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('EMP') }}"
+                  >Empleados</a
+                >
+              </li>
+              {% endif %} {% if 'Administrador' in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('gestion_servicios') }}"
+                  >Servicios Adicionales</a
+                >
+              </li>
+              {% endif %} {% if 'Administrador' in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('ADT') }}"
+                  >Administración de Tienda</a
+                >
+              </li>
+              {% endif %} {% if 'Administrador' in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('gestion_gasolina') }}"
+                  >Gestión de Gasolina</a
+                >
+              </li>
+              {% endif %} {% if 'Administrador' in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('pre_ventas') }}"
+                  >Ventas</a
+                >
+              </li>
+              {% endif %} {% if 'Administrador' in session['user_roles'] %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('mantenimiento') }}"
+                  >Mantenimiento Predictivo</a
+                >
+              </li>
+              {% endif %} {% endif %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('contact') }}"
+                  >Contactos</a
+                >
+              </li>
+              {% if 'usuario_id' in session %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('logout') }}"
+                  >Desconectarse</a
+                >
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4" style="margin-top: 100px">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <div class="alert alert-dismissible fade show" role="alert">
+            <ul>
+              {% for category, message in messages %}
+              <li class="alert alert-{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="alert"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          {% endif %} {% endwith %}
+
+          <div class="container mt-5">{% block content %}{% endblock %}</div>
+        </main>
+      </div>
     </div>
 
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-text">
-                <span>Servicentro Corazón de Jesús</span>
-            </div>
+      <div class="footer-content">
+        <div class="footer-text">
+          <span>Servicentro Corazón de Jesús</span>
         </div>
+      </div>
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 </html>
