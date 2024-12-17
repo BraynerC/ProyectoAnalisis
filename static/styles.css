@@ -182,6 +182,10 @@ main {
     color: #ffffff;
 }
 
+.text-primary {
+    color: #28a745 !important; 
+}
+
 .container {
     background: #ffffff;
     padding: 30px;
