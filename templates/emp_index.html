@@ -8,9 +8,11 @@ set show_navigation = true %} {% block content %}
     role="group"
     aria-label="Gestión de Empleados"
   >
+  {% if 'Empleado' in session['user_roles'] %}
     <a href="{{ url_for('vacaciones') }}" class="btn btn-orange"
       >Solicitar Vacaciones</a
     >
+    {% endif %}
     {% if 'Administrador' in session['user_roles'] %}
     <a href="{{ url_for('gestionar_vacaciones') }}" class="btn btn-yellow"
       >Ver Solicitudes</a
