@@ -1087,7 +1087,7 @@ def venta_gasolina():
 
         conn.commit()
         conn.close()
-        return redirect('/alertas')
+        return redirect('/venta_gasolina')
 
 @app.route('/reabastecer', methods=['GET', 'POST'])
 def reabastecer():
@@ -1117,7 +1117,7 @@ def reabastecer():
 
         conn.commit()
         conn.close()
-        return redirect('/')
+        return redirect('/reabastecer')
 
 @app.route('/alertas', methods=['GET', 'POST'])
 def alertas():

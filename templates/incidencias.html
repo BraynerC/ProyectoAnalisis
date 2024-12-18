@@ -31,8 +31,9 @@
                 No hay incidencias registradas.
             </div>
         {% endif %}
-        <button onclick="window.location.href='{{ url_for('generar_reporte') }}'" class="btn btn-secondary mt-3">
+        <button onclick="window.location.href='{{ url_for('generar_reporte') }}'" class="btn btn-primary mt-3">
             Generar Reporte
         </button>
+        <a href="{{ url_for('gestion_gasolina') }}" class="btn btn-secondary mt-3">Volver a Gestión</a>
     </div>
 {% endblock %}
