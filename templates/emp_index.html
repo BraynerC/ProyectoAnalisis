@@ -15,7 +15,7 @@ set show_navigation = true %} {% block content %}
     {% endif %}
     {% if 'Administrador' in session['user_roles'] %}
     <a href="{{ url_for('gestionar_vacaciones') }}" class="btn btn-yellow"
-      >Ver Solicitudes</a
+      >Ver Solicitudes de Vacaciones</a
     >
     <a href="{{ url_for('error_en_desarrollo') }}" class="btn btn-orange"
       >Evaluaciones de Desempeño</a
