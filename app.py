@@ -46,7 +46,9 @@ def requiere_autenticacion(f):
 
 def obtener_roles(usuario_id):
     roles = execute_query("SELECT rol FROM Usuarios WHERE usuario_id = ?", (usuario_id,))
+    print(roles)  
     return [rol[0] for rol in roles] if roles else []
+
 
 def requiere_rol(roles_permitidos):
     def decorador(f):
@@ -83,14 +85,17 @@ def contact():
     return render_template('contact.html')
 
 @app.route('/ADT')
+@requiere_rol(['Gerente', 'Administrador'])
 def ADT():
     return render_template('adt_index.html')
 
 @app.route('/pre_ventas')
+@requiere_rol(['Empleado', 'Gerente', 'Administrador'])
 def pre_ventas():
     return render_template('pre_ventas.html')
 
 @app.route('/mantenimiento')
+@requiere_rol(['Tecnico', 'Administrador'])
 def mantenimiento():
     return render_template('mantenimiento.html')
 
@@ -253,7 +258,7 @@ def configure_payment_method():
     return render_template('configure_payment_method.html')
 
 @app.route('/reabastecimiento')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico'])
+@requiere_rol(['Tecnico', 'Administrador'])
 def reabastecimiento():
     return render_template('reabastecimiento.html')
 
@@ -283,6 +288,7 @@ def incidencias():
     return render_template('incidencias.html')
 
 @app.route('/gestion_servicios')
+@requiere_rol(['Empleado', 'Gerente', 'Administrador'])
 def gestion_servicios():
     return render_template('gestion_servicios.html')
 
@@ -585,14 +591,18 @@ def autenticacion():
         elif not check_password_hash(user[0][2], password):
             flash('La contraseña es incorrecta', 'danger')
         else:
-            session['usuario_id'] = user[0][0]  
-            session['user_roles'] = obtener_roles(user[0][0])          
+            session['usuario_id'] = user[0][0]
+            session['user_roles'] = obtener_roles(user[0][0])
+            session['rol'] = session['user_roles'][0] if session['user_roles'] else None
+            flash(f'Roles asignados: {session["user_roles"]}', 'success')  # Verifica los roles asignados
             flash('Inicio de sesión exitoso', 'success')
             return redirect(url_for('home'))
-        
+
         return redirect(url_for('autenticacion'))
 
     return render_template('autenticacion.html')
+
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -653,6 +663,7 @@ def listar_devoluciones():
     return render_template('listar_devoluciones.html', devoluciones=devoluciones)
 
 @app.route('/EMP')
+@requiere_rol(['Empleado', 'Gerente', 'Administrador'])
 def EMP():
     if 'usuario_id' not in session:
         return redirect(url_for('autenticacion'))
@@ -856,6 +867,11 @@ def consultar_citas():
     conn.close()
 
     return render_template('consultar_citas.html', citas=citas)
+
+@app.route('/calcular_nomina')
+def calcular_nomina():
+    return render_template('calcular_nomina.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
