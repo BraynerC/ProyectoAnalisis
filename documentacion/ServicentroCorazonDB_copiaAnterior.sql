@@ -16,7 +16,6 @@ CREATE TABLE Empleados (
     telefono NVARCHAR(15),
     direccion NVARCHAR(255),
     fecha_contratacion DATE,
-    salario_base INT,
     rol NVARCHAR(50) CHECK (rol IN ('Administrador', 'Gerente', 'Empleado', 'Tecnico', 'Mantenimiento')),
     estatus NVARCHAR(10) DEFAULT 'Activo' CHECK (estatus IN ('Activo', 'Inactivo'))
 );
@@ -26,7 +25,7 @@ CREATE TABLE Usuarios (
     nombre_usuario NVARCHAR(50) UNIQUE NOT NULL,
     contrasena NVARCHAR(255) NOT NULL, 
     empleado_id INT NULL, 
-    rol NVARCHAR(50) DEFAULT 'Cliente',
+    rol NVARCHAR(50) DEFAULT 'Cliente', -- Constraint eliminado
     fecha_creacion DATETIME DEFAULT GETDATE(),
     estatus NVARCHAR(10) DEFAULT 'Activo' CHECK (estatus IN ('Activo', 'Inactivo'))
 );
@@ -40,7 +39,7 @@ CREATE TABLE Inventarios (
     fecha_ultima_actualizacion DATETIME DEFAULT GETDATE()
 );
 
-CREATE TABLE Proveedores (
+CREATE TABLE proveedores (
     id INT IDENTITY(1,1) PRIMARY KEY,      
     nombre_proveedor NVARCHAR(100) NOT NULL, 
     contacto NVARCHAR(100) NOT NULL,         
@@ -68,9 +67,7 @@ CREATE TABLE Devoluciones (
     venta_id INT,
     producto_id INT,
     cantidad INT,
-    fecha_devolucion DATETIME DEFAULT GETDATE(),
-    motivo NVARCHAR(255),
-    fecha_fin DATETIME
+    fecha_devolucion DATETIME DEFAULT GETDATE()
 );
 
 CREATE TABLE Mantenimiento (
@@ -85,8 +82,7 @@ CREATE TABLE Reabastecimiento_Gasolina (
     reabastecimiento_id INT PRIMARY KEY IDENTITY(1,1),
     cantidad DECIMAL(10, 2),
     fecha_solicitud DATETIME DEFAULT GETDATE(),
-    fecha_entrega DATE,
-    producto_id INT
+    fecha_entrega DATE
 );
 
 CREATE TABLE Servicios_Adicionales (
@@ -94,27 +90,21 @@ CREATE TABLE Servicios_Adicionales (
     tipo_servicio NVARCHAR(50) CHECK (tipo_servicio IN ('Lubricentro', 'Llantera')),
     descripcion NVARCHAR(MAX),
     fecha_servicio DATE,
-    empleado_id INT,
-    cliente_id INT
+    empleado_id INT
 );
 
 CREATE TABLE Reportes (
     reporte_id INT PRIMARY KEY IDENTITY(1,1),
     tipo_reporte NVARCHAR(100),
     fecha_generacion DATETIME DEFAULT GETDATE(),
-    contenido NVARCHAR(MAX),
-    usuario_id INT
+    contenido NVARCHAR(MAX)
 );
 
 CREATE TABLE Promociones (
     id INT PRIMARY KEY IDENTITY(1,1),
     nombre NVARCHAR(100) NOT NULL,
     detalles NVARCHAR(MAX),
-    fecha_creacion DATETIME DEFAULT GETDATE(),
-    descuento DECIMAL(5, 2), 
-    fecha_inicio DATETIME, 
-    fecha_fin DATETIME,
-    producto_id INT
+    fecha_creacion DATETIME DEFAULT GETDATE()
 );
 
 CREATE TABLE Parametros_Mantenimiento (
@@ -125,65 +115,6 @@ CREATE TABLE Parametros_Mantenimiento (
     fecha_actualizacion DATETIME DEFAULT GETDATE()
 );
 
--- CREACION DE TABLA CLIENTES
-CREATE TABLE Clientes (
-    cliente_id INT PRIMARY KEY IDENTITY(1,1),
-    nombre NVARCHAR(100),
-    telefono NVARCHAR(15),
-    email NVARCHAR(100)
-);
-
--- CREACION DE TABLA CITAS
-CREATE TABLE Citas (
-    cita_id INT PRIMARY KEY IDENTITY(1,1),
-    tipo_servicio VARCHAR(50),
-    descripcion TEXT,
-    fecha_servicio DATETIME,
-    estado VARCHAR(50) DEFAULT 'Pendiente',
-    cliente_nombre VARCHAR(100),
-    cliente_telefono VARCHAR(20),
-    cliente_email VARCHAR(100)
-);
-
-CREATE TABLE gasolina (
-    gasolina_id INT PRIMARY KEY IDENTITY(1,1),
-    tipo VARCHAR(50), 
-    cantidad_litros FLOAT,
-    minimo_litros FLOAT 
-);
-
-CREATE TABLE Solicitudes_Vacaciones (
-    solicitud_id INT PRIMARY KEY IDENTITY(1,1),
-    empleado_id INT NOT NULL,
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE NOT NULL,
-    estatus NVARCHAR(20) DEFAULT 'Pendiente' CHECK (estatus IN ('Pendiente', 'Aprobado', 'Rechazado')),
-    fecha_solicitud DATETIME DEFAULT GETDATE(),
-    comentario NVARCHAR(255) NULL,
-    FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id)
-);
-
-
-INSERT INTO gasolina (tipo, cantidad_litros, minimo_litros)
-VALUES 
-    ('Gasolina Super', 5000, 1000),
-    ('Gasolina Regular', 7000, 1500), 
-    ('Diesel', 10000, 2000); 
-
-CREATE TABLE reabastecimiento (
-    reabastecimiento_id INT PRIMARY KEY IDENTITY(1,1),
-    gasolina_id INT FOREIGN KEY REFERENCES gasolina(gasolina_id),
-    cantidad FLOAT,
-    fecha_solicitud DATETIME,
-    fecha_entrega DATETIME
-);
-
-CREATE TABLE Metodos_Pago (
-    metodo_id INT PRIMARY KEY IDENTITY(1,1),
-    nombre_metodo NVARCHAR(100) NOT NULL,
-    descripcion NVARCHAR(255),
-    estado NVARCHAR(10) DEFAULT 'Activo' CHECK (estado IN ('Activo', 'Inactivo'))
-);
 
 -- CREACION DE CLAVES FORANEAS
 ALTER TABLE Ventas
@@ -198,11 +129,29 @@ ADD FOREIGN KEY (venta_id) REFERENCES Ventas(venta_id),
     FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
 
 ALTER TABLE Servicios_Adicionales
-ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id),
-    FOREIGN KEY (cliente_id) REFERENCES Clientes(cliente_id);
+ADD FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
 
 ALTER TABLE Reabastecimiento_Gasolina
-ADD FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
+ADD producto_id INT,
+	FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
+
+ALTER TABLE Mantenimiento
+ADD empleado_id INT,
+	FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
+
+ALTER TABLE Inventarios
+ADD restricciones INT NULL, 
+    descripcion NVARCHAR(MAX); 
+
+ALTER TABLE Promociones
+ADD descuento DECIMAL(5, 2), 
+    fecha_inicio DATETIME, 
+    fecha_fin DATETIME; 
+
+
+ALTER TABLE Devoluciones
+ADD motivo NVARCHAR(255),
+    fecha_fin DATETIME;
 
 ALTER TABLE Reportes
 ADD CONSTRAINT FK_UsuarioID
@@ -213,22 +162,49 @@ ADD CONSTRAINT FK_EmpleadoID
 FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id);
 
 ALTER TABLE Promociones
+ADD producto_id INT;
+
+ALTER TABLE Promociones
 ADD FOREIGN KEY (producto_id) REFERENCES Inventarios(producto_id);
 
 ALTER TABLE Inventarios
 ADD marca NVARCHAR(100);
 
 ALTER TABLE Proveedores
-ADD marca_id INT,
-    FOREIGN KEY (marca_id) REFERENCES Inventarios(producto_id);
+ADD marca_id INT;
 
---Nuevo--
+ALTER TABLE Proveedores
+ADD FOREIGN KEY (marca_id) REFERENCES Inventarios(producto_id);
 
-CREATE TABLE Evaluaciones (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    EmpleadoId INT NOT NULL,
-    EmpleadoNombre NVARCHAR(100) NOT NULL,
-    Puntuacion INT NOT NULL,
-    Comentarios NVARCHAR(MAX),
-    FechaEvaluacion DATETIME DEFAULT GETDATE()
+--Nuevo
+
+CREATE TABLE Clientes (
+    cliente_id INT PRIMARY KEY IDENTITY(1,1),
+    nombre NVARCHAR(100),
+    telefono NVARCHAR(15),
+    email NVARCHAR(100)
 );
+
+ALTER TABLE Servicios_Adicionales
+ADD cliente_id INT;
+
+CREATE TABLE Citas (
+    cita_id INT PRIMARY KEY IDENTITY(1,1),
+    tipo_servicio VARCHAR(50),
+    descripcion TEXT,
+    fecha_servicio DATETIME,
+    estado VARCHAR(50) DEFAULT 'Pendiente'
+);
+
+ALTER TABLE Citas
+ADD cliente_nombre VARCHAR(100),
+    cliente_telefono VARCHAR(20),
+    cliente_email VARCHAR(100);
+
+ALTER TABLE Promociones
+ADD producto_id INT;
+
+ALTER TABLE Citas
+DROP CONSTRAINT FK__Citas__cliente_i__5224328E;
+
+

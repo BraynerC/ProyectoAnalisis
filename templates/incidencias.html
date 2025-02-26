@@ -5,7 +5,7 @@
 {% block content %}
     <div class="container">
         <h2>Registrar Incidencia</h2>
-        <form method="post" action="{{ url_for('incidencias') }}">
+        <form method="post" action="{{ url_for('registrar_incidencia') }}">
             <div class="form-group">
                 <label for="tipo_incidencia">Tipo de Incidencia:</label>
                 <input type="text" id="tipo_incidencia" name="tipo_incidencia" class="form-control" placeholder="Ej: Calidad de Gasolina" required>
@@ -18,9 +18,22 @@
         </form>
         <hr>
         <h3>Incidencias Recientes</h3>
-        <div class="alert alert-danger" role="alert">
-            Incidencia registrada: Calidad de gasolina no cumple con los estándares.
-        </div>
-        <button class="btn btn-secondary">Generar Reporte</button>
+        {% if incidencias %}
+            <ul class="list-group">
+                {% for incidencia in incidencias %}
+                    <li class="list-group-item">
+                        <strong>{{ incidencia.tipo }}</strong> - {{ incidencia.descripcion }} ({{ incidencia.fecha }})
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                No hay incidencias registradas.
+            </div>
+        {% endif %}
+        <button onclick="window.location.href='{{ url_for('generar_reporte') }}'" class="btn btn-primary mt-3">
+            Generar Reporte
+        </button>
+        <a href="{{ url_for('gestion_gasolina') }}" class="btn btn-secondary mt-3">Volver a Gestión</a>
     </div>
 {% endblock %}

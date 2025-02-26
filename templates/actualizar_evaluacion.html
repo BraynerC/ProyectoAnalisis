@@ -1,23 +1,36 @@
 {% extends 'base.html' %}
 
 {% block title %}Actualizar Evaluación{% endblock %}
-
 {% block content %}
     <h1>Actualizar Evaluación</h1>
-    <form>
+    <form method="POST" action="{{ url_for('actualizar_evaluacion', evaluacion_id=evaluacion.Id) }}">
         <div class="form-group">
-            <label for="empleado">Empleado:</label>
-            <input type="text" id="empleado" name="empleado" class="form-control" value="Nombre del empleado" required>
+            <label for="user_id">Empleado</label>
+            <select id="user_id" name="user_id" class="form-control" required>
+                {% for usuario in usuarios %}
+                    <option value="{{ usuario.Id }}" data-nombre="{{ usuario.Nombre }}"
+                            {% if usuario.Id == evaluacion.EmpleadoId %}selected{% endif %}>
+                        {{ usuario.Nombre }} (ID: {{ usuario.Id }})
+                    </option>
+                {% endfor %}
+            </select>
+            <input type="hidden" id="user_name" name="user_name" value="{{ evaluacion.EmpleadoNombre }}">
         </div>
         <div class="form-group">
-            <label for="metricas">Métricas:</label>
-            <textarea id="metricas" name="metricas" class="form-control" required>Métricas anteriores</textarea>
+            <label for="puntuacion">Puntuación</label>
+            <input type="number" id="puntuacion" name="puntuacion" class="form-control" value="{{ evaluacion.Puntuacion }}" min="0" max="100" required>
         </div>
         <div class="form-group">
-            <label for="comentarios">Comentarios:</label>
-            <textarea id="comentarios" name="comentarios" class="form-control" required>Comentarios anteriores</textarea>
+            <label for="comentarios">Comentarios</label>
+            <textarea id="comentarios" name="comentarios" class="form-control" rows="4" required>{{ evaluacion.Comentarios }}</textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <button type="submit" class="btn btn-primary">Actualizar Evaluación</button>
     </form>
-    <div class="alert alert-success mt-3" style="display: none;">Cambios guardados exitosamente</div>
+
+    <script>
+        document.getElementById('user_id').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('user_name').value = selectedOption.getAttribute('data-nombre');
+        });
+    </script>
 {% endblock %}

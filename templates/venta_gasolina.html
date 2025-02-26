@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Venta de Gasolina{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4">Venta de Gasolina</h2>
+    <form method="POST" action="{{ url_for('venta_gasolina') }}">
+        <div class="form-group">
+            <label for="tipo_gasolina">Tipo de Gasolina:</label>
+            <select name="tipo_gasolina" id="tipo_gasolina" class="form-control" required>
+                <option value="Gasolina Super">Gasolina Super</option>
+                <option value="Gasolina Regular">Gasolina Regular</option>
+                <option value="Diesel">Diesel</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="litros_vendidos">Litros Vendidos:</label>
+            <input type="number" name="litros_vendidos" id="litros_vendidos" class="form-control" placeholder="Ingrese la cantidad de litros vendidos" required>
+        </div>
+        <button type="submit" class="btn btn-orange">Registrar Venta</button>
+        <a href="{{ url_for('gestion_gasolina') }}" class="btn btn-secondary ml-3">Volver a Gestión</a>
+    </form>
+</div>
+{% endblock %}
