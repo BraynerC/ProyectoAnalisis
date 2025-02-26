@@ -1,22 +1,35 @@
 {% extends 'base.html' %}
 
 {% block title %}Evaluar Desempeño{% endblock %}
-{% set show_navigation = true %}
 {% block content %}
     <h1>Evaluar Desempeño</h1>
-    <form method="get">
+    <form method="POST" action="{{ url_for('evaluar_desempeno') }}">
         <div class="form-group">
-            <label for="empleado">Empleado:</label>
-            <input type="text" id="empleado" name="empleado" class="form-control" required>
+            <label for="user_id">Empleado</label>
+            <select id="user_id" name="user_id" class="form-control" required>
+                {% for usuario in usuarios %}
+                    <option value="{{ usuario.Id }}" data-nombre="{{ usuario.Nombre }}">
+                        {{ usuario.Nombre }} (ID: {{ usuario.Id }})
+                    </option>
+                {% endfor %}
+            </select>
+            <input type="hidden" id="user_name" name="user_name">
         </div>
         <div class="form-group">
-            <label for="metricas">Métricas:</label>
-            <textarea id="metricas" name="metricas" class="form-control" required></textarea>
+            <label for="puntuacion">Puntuación</label>
+            <input type="number" id="puntuacion" name="puntuacion" class="form-control" min="0" max="100" required>
         </div>
         <div class="form-group">
-            <label for="comentarios">Comentarios:</label>
-            <textarea id="comentarios" name="comentarios" class="form-control" required></textarea>
+            <label for="comentarios">Comentarios</label>
+            <textarea id="comentarios" name="comentarios" class="form-control" rows="4" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Guardar Evaluación</button>
     </form>
+
+    <script>
+        document.getElementById('user_id').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('user_name').value = selectedOption.getAttribute('data-nombre');
+        });
+    </script>
 {% endblock %}
