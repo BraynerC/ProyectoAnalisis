@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Gasolina{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4">Gestión de Gasolina</h2>
+    <div class="row mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Venta de Gasolina</h5>
+                    <p class="card-text">Registre las ventas de gasolina realizadas.</p>
+                    <a href="{{ url_for('venta_gasolina') }}" class="btn btn-green">Ir a Ventas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Alertas de Gasolina</h5>
+                    <p class="card-text">Consulte los niveles mínimos de gasolina y envíe alertas.</p>
+                    <a href="{{ url_for('alertas') }}" class="btn btn-orange">Ver Alertas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Reabastecimiento de Gasolina</h5>
+                    <p class="card-text">Registre el reabastecimiento de gasolina.</p>
+                    <a href="{{ url_for('reabastecer') }}" class="btn btn-yellow">Ir a Reabastecimiento</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Configurar Umbrales</h5>
+                    <p class="card-text">Configure los niveles mínimos de gasolina.</p>
+                    <a href="{{ url_for('configurar_umbrales') }}" class="btn btn-green">Configurar Umbrales</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Reporte de Incidencias</h5>
+                    <p class="card-text">Registre incidencias relacionadas con la gasolina.</p>
+                    <a href="{{ url_for('incidencias') }}" class="btn btn-orange">Generar Reporte</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

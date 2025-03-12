@@ -25,7 +25,7 @@
                     <td>{{ solicitud.fecha_fin }}</td>
                     <td>{{ solicitud.estado }}</td>
                     <td>
-                        {% if session.get('rol') in ['Gerente', 'Administrador'] %}
+                        {% if rol in ['Administrador', 'Gerente'] %}
                             <button type="button" class="btn btn-success" onclick="alert('Solicitud aprobada exitosamente')">Aprobar</button>
                             <button type="button" class="btn btn-danger" onclick="alert('Solicitud rechazada exitosamente')">Rechazar</button>
                         {% endif %}

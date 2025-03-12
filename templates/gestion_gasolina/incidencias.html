@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes de Incidencias{% endblock %}
+{% set show_navigation = true %}
+{% block content %}
+    <div class="container">
+        <h2>Registrar Incidencia</h2>
+        <form method="post" action="{{ url_for('registrar_incidencia') }}">
+            <div class="form-group">
+                <label for="tipo_incidencia">Tipo de Incidencia:</label>
+                <input type="text" id="tipo_incidencia" name="tipo_incidencia" class="form-control" placeholder="Ej: Calidad de Gasolina" required>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" class="form-control" rows="4" placeholder="Detalles de la incidencia" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar Incidencia</button>
+        </form>
+        <hr>
+        <h3>Incidencias Recientes</h3>
+        {% if incidencias %}
+            <ul class="list-group">
+                {% for incidencia in incidencias %}
+                    <li class="list-group-item">
+                        <strong>{{ incidencia.tipo }}</strong> - {{ incidencia.descripcion }} ({{ incidencia.fecha }})
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                No hay incidencias registradas.
+            </div>
+        {% endif %}
+        <button onclick="window.location.href='{{ url_for('generar_reporte') }}'" class="btn btn-primary mt-3">
+            Generar Reporte
+        </button>
+        <a href="{{ url_for('gestion_gasolina') }}" class="btn btn-secondary mt-3">Volver a Gestión</a>
+    </div>
+{% endblock %}
