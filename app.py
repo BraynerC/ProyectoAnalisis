@@ -50,7 +50,9 @@ def requiere_autenticacion(f):
 
 def obtener_roles(usuario_id):
     roles = execute_query("SELECT rol FROM Usuarios WHERE usuario_id = ?", (usuario_id,))
+    print(roles)  
     return [rol[0] for rol in roles] if roles else []
+
 
 def requiere_rol(roles_permitidos):
     def decorador(f):
