@@ -13,7 +13,7 @@ set show_navigation = true %} {% block content %}
       >Solicitar Vacaciones</a
     >
     {% endif %}
-    {% if 'Administrador' in session['user_roles'] %}
+    {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
     <a href="{{ url_for('gestionar_vacaciones') }}" class="btn btn-yellow"
       >Ver Solicitudes</a
     >
@@ -24,7 +24,7 @@ set show_navigation = true %} {% block content %}
       >Consultar Ventas</a
     >
     <a href="{{ url_for('ingreso_empleado') }}" class="btn btn-yellow"
-      >ingresar Empleado</a
+      >Ingresar Empleado</a
     >
     <a href="{{ url_for('generar_reporte_nomina_pdf') }}" class="btn btn-green"
       >Calcular Nómina</a

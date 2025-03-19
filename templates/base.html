@@ -58,19 +58,19 @@
                   >Servicios Adicionales</a
                 >
               </li>
-              {% endif %} {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
+              {% endif %} {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] or 'Empleado' in session['user_roles'] %}
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('ADT') }}"
                   >Administración de Tienda</a
                 >
               </li>
-              {% endif %} {% if 'Tecnico' in session['user_roles'] or 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
+              {% endif %} 
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('gestion_gasolina') }}"
                   >Gestión de Gasolina</a
                 >
               </li>
-              {% endif %} {% if 'Empleado' in session['user_roles'] or 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
+              {% if 'Empleado' in session['user_roles'] or 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('pre_ventas') }}"
                   >Ventas</a

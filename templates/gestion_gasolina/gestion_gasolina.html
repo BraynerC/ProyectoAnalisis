@@ -16,6 +16,7 @@
                 </div>
             </div>
         </div>
+        {% if 'Tecnico' in session['user_roles'] or 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
         <div class="col-md-4 mb-4">
             <div class="card text-center">
                 <div class="card-body">
@@ -24,7 +25,8 @@
                     <a href="{{ url_for('alertas') }}" class="btn btn-orange">Ver Alertas</a>
                 </div>
             </div>
-        </div>
+        </div> 
+        {% endif %} {% if 'Tecnico' in session['user_roles'] or 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
         <div class="col-md-4 mb-4">
             <div class="card text-center">
                 <div class="card-body">
@@ -33,7 +35,7 @@
                     <a href="{{ url_for('reabastecer') }}" class="btn btn-yellow">Ir a Reabastecimiento</a>
                 </div>
             </div>
-        </div>
+        </div>{% endif %} {% if 'Tecnico' in session['user_roles'] or 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
         <div class="col-md-4 mb-4">
             <div class="card text-center">
                 <div class="card-body">
@@ -42,7 +44,7 @@
                     <a href="{{ url_for('configurar_umbrales') }}" class="btn btn-green">Configurar Umbrales</a>
                 </div>
             </div>
-        </div>
+        </div>{% endif %} {% if 'Tecnico' in session['user_roles'] or 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
         <div class="col-md-4 mb-4">
             <div class="card text-center">
                 <div class="card-body">
@@ -51,7 +53,7 @@
                     <a href="{{ url_for('incidencias') }}" class="btn btn-orange">Generar Reporte</a>
                 </div>
             </div>
-        </div>
+        </div> {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -67,6 +67,8 @@ def requiere_rol(roles_permitidos):
     return decorador
 
 @app.route('/error_en_desarrollo')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def error_en_desarrollo():
     return render_template('error.html', mensaje="Esta funcionalidad está en desarrollo. Inténtalo más tarde.")
 
@@ -90,6 +92,8 @@ def about():
     return render_template('about.html')
 
 @app.route('/ingreso_empleado', methods=['GET'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def ingreso_empleado():
     usuarios = execute_query('''
         SELECT usuario_id, nombre_usuario, rol, estatus, fecha_creacion
@@ -99,6 +103,8 @@ def ingreso_empleado():
     return render_template('ingreso_empleado.html', usuarios=usuarios)
 
 @app.route('/convertir_empleado/<int:usuario_id>', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def convertir_empleado(usuario_id):
     if request.method == 'POST':
         nombre = request.form['nombre']
@@ -133,6 +139,8 @@ def convertir_empleado(usuario_id):
         return redirect(url_for('ingreso_empleado'))
 
 @app.route('/evaluar_desempeno', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def evaluar_desempeno():
     if 'Administrador' not in session['user_roles'] and 'Gerente' not in session['user_roles']:
         return redirect(url_for('mostrar_evaluaciones'))
@@ -169,6 +177,8 @@ def evaluar_desempeno():
 
 
 @app.route('/actualizar_evaluacion/<int:evaluacion_id>', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def actualizar_evaluacion(evaluacion_id):
     if 'Administrador' not in session['user_roles'] and 'Gerente' not in session['user_roles']:
         return redirect(url_for('mostrar_evaluaciones'))
@@ -214,58 +224,86 @@ def contact():
     return render_template('contact.html')
 
 @app.route('/ADT')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def ADT():
     return render_template('adt_index.html')
 
 @app.route('/pre_ventas')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def pre_ventas():
     return render_template('pre_ventas.html')
 
 @app.route('/mantenimiento')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def mantenimiento():
     return render_template('mantenimiento.html')
 
 @app.route('/solicitar_vacaciones')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Empleado'])
 def solicitar_vacaciones():
     return render_template('solicitar_vacaciones.html')
 
 @app.route('/ver_solicitudes')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def ver_solicitudes():
     return render_template('ver_solicitudes.html')
 
 @app.route('/resultado_evaluacion')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def resultado_evaluacion():
     return render_template('resultado_evaluacion.html')
 
 @app.route('/consultar_ventas')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def consultar_ventas():
     return render_template('consultar_ventas.html')
 
 @app.route('/gestion_inventario')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_inventario():
     return render_template('gestion_inventario.html')
 
 @app.route('/gestion_proveedores')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_proveedores():
     return render_template('gestion_proveedores.html')
 
 @app.route('/gestion_promociones')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_promociones():
     return render_template('gestion_promociones.html')
 
 @app.route('/gestion_productos')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def gestion_productos():
     return render_template('gestion_productos.html')
 
 @app.route('/reportes_financieros')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def reportes_financieros():
     return render_template('reportes_financieros.html')
 
 @app.route('/cashier_functions')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def cashier_functions():
     return render_template('cashier_functions.html')
 
 @app.route('/admin_functions', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def admin_functions():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -302,12 +340,22 @@ def admin_functions():
 
     return render_template('admin_functions.html', metodos_pago=metodos_pago)
 
+@app.route('/admin_functions_maintenance')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
+def admin_functions_maintenance():
+    return render_template('admin_functions_maintenance.html')
+
 
 @app.route('/configure_promotion')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def configure_promotion():
     return render_template('configure_promotion.html')
 
 @app.route('/technical_functions')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def technical_functions():
     # Obtener los parámetros actuales de la DB
     query = "SELECT pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion FROM Parametros_Mantenimiento WHERE id = 1"
@@ -326,6 +374,8 @@ def technical_functions():
 
 
 @app.route('/update_parameters', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def update_parameters():
     try:
         pressure_limit = request.form['pressure_limit']
@@ -359,6 +409,8 @@ def update_parameters():
 
 
 @app.route('/manual_check', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def manual_check():
     try:
 
@@ -379,6 +431,8 @@ def manual_check():
     return redirect(url_for('technical_functions'))
 
 @app.route('/get_parameters')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def get_parameters():
     try:
         query = "SELECT pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion FROM Parametros_Mantenimiento WHERE id = 1"
@@ -406,22 +460,22 @@ def get_parameters():
 
 
 @app.route('/actualizar_precio_producto')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def actualizar_precio_producto():
     return render_template('actualizar_precio_producto.html')
 
 @app.route('/generate_report')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def generate_report():
     return render_template('generate_report.html')
 
 @app.route('/configure_payment_method')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def configure_payment_method():
     return render_template('configure_payment_method.html')
-
-@app.route('/reabastecimiento')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico'])
-def reabastecimiento():
-    return render_template('reabastecimiento.html')
-
 
 
 @app.route('/solicitud_reabastecimiento')
@@ -445,10 +499,14 @@ def incidencias():
     return render_template('gestion_gasolina/incidencias.html')
 
 @app.route('/gestion_servicios')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_servicios():
     return render_template('gestion_servicios.html')
 
 @app.route('/nomina')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def generar_reporte_nomina_pdf():
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
@@ -490,6 +548,8 @@ def generar_reporte_nomina_pdf():
 
 
 @app.route('/process_sale', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def process_sale():
     product_code = request.form['product_code']
     quantity = int(request.form['quantity'])
@@ -530,6 +590,8 @@ def process_sale():
     return redirect(url_for('consultar_ventas'))
 
 @app.route('/consultar_servicios')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def consultar_servicios():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -551,6 +613,8 @@ def consultar_servicios():
 
 
 @app.route('/registrar_servicio', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def registrar_servicio():
     if request.method == 'POST':
         tipo_servicio = request.form['tipo_servicio']
@@ -572,6 +636,8 @@ def registrar_servicio():
 
 
 @app.route('/editar_servicio/<int:servicio_id>', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def editar_servicio(servicio_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -591,6 +657,8 @@ def editar_servicio(servicio_id):
     return render_template('editar_servicio.html', servicio=servicio)
 
 @app.route('/eliminar_servicio/<int:servicio_id>', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def eliminar_servicio(servicio_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -717,13 +785,15 @@ def editar_promocion(id):
     return render_template('editar_promocion.html', promocion=promocion[0])
 
 @app.route('/eliminar_promocion/<int:id>')
-@requiere_rol(['Administrador', 'Gerente'])
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def eliminar_promocion(id):
     execute_query("DELETE FROM Promociones WHERE id = ?", (id,))
     flash('Promoción eliminada con éxito', 'success')
     return redirect(url_for('listar_promociones'))
 
 @app.route('/registro_proveedor', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def registro_proveedor():
     if request.method == 'POST':
         nombre_proveedor = request.form['nombre_proveedor']
@@ -740,11 +810,15 @@ def registro_proveedor():
     return render_template('registro_proveedor.html')
 
 @app.route('/listar_proveedores')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def listar_proveedores():
     proveedores = execute_query('SELECT * FROM proveedores', fetch=True)
     return render_template('listar_proveedores.html', proveedores=proveedores)
 
 @app.route('/editar_proveedor/<int:id>', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def editar_proveedor(id):
     proveedor = execute_query('SELECT * FROM proveedores WHERE id = ?', (id,), fetch=True)
     if not proveedor:
@@ -765,6 +839,8 @@ def editar_proveedor(id):
     return render_template('editar_proveedor.html', proveedor=proveedor[0])
 
 @app.route('/eliminar_proveedor/<int:id>', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def eliminar_proveedor(id):
     proveedor = execute_query('SELECT * FROM proveedores WHERE id = ?', (id,), fetch=True)
     if not proveedor:
