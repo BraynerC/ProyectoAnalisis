@@ -1,13 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
-from reportlab.lib.pagesizes import A4
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify, make_response
+from reportlab.lib.pagesizes import A4, letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
-from flask import jsonify
-import pyodbc  
-
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import pyodbc
+from datetime import datetime
+from datetime import datetime
+import io
 
 app = Flask(__name__)
 app.secret_key = 'Hola'
@@ -62,6 +66,13 @@ def requiere_rol(roles_permitidos):
         return decorada
     return decorador
 
+@app.route('/error_en_desarrollo')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
+def error_en_desarrollo():
+    return render_template('error.html', mensaje="Esta funcionalidad está en desarrollo. Inténtalo más tarde.")
+
+
 @app.route('/')
 @requiere_autenticacion
 def home():
@@ -80,74 +91,271 @@ def logout():
 def about():
     return render_template('about.html')
 
+@app.route('/ingreso_empleado', methods=['GET'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
+def ingreso_empleado():
+    usuarios = execute_query('''
+        SELECT usuario_id, nombre_usuario, rol, estatus, fecha_creacion
+        FROM Usuarios
+        WHERE rol = 'Pendiente' OR estatus = 'Inactivo'
+    ''')
+    return render_template('ingreso_empleado.html', usuarios=usuarios)
+
+@app.route('/convertir_empleado/<int:usuario_id>', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
+def convertir_empleado(usuario_id):
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellido = request.form['apellido']
+        email = request.form['email']
+        telefono = request.form['telefono']
+        direccion = request.form['direccion']
+        fecha_contratacion = request.form['fecha_contratacion']
+
+        print(f"usuario_id recibido: {usuario_id}")
+
+        try:
+            execute_query('''
+                INSERT INTO Empleados (nombre, apellido, email, telefono, direccion, fecha_contratacion, rol, estatus)
+                VALUES (?, ?, ?, ?, ?, ?, 'Empleado', 'Activo')
+            ''', (nombre, apellido, email, telefono, direccion, fecha_contratacion))
+
+            nuevo_empleado_id = execute_query('SELECT SCOPE_IDENTITY()')[0][0]
+
+            print(f"Nuevo Empleado ID: {nuevo_empleado_id}")
+
+            execute_query('''
+                UPDATE Usuarios
+                SET empleado_id = ?, rol = 'Empleado', estatus = 'Activo'
+                WHERE usuario_id = ?
+            ''', (nuevo_empleado_id, usuario_id))
+
+            flash('Usuario convertido en empleado exitosamente.', 'success')
+        except Exception as e:
+            flash(f'Error al convertir usuario en empleado: {str(e)}', 'danger')
+
+        return redirect(url_for('ingreso_empleado'))
+
+@app.route('/evaluar_desempeno', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
+def evaluar_desempeno():
+    if 'Administrador' not in session['user_roles'] and 'Gerente' not in session['user_roles']:
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT Usuario.Id, Usuario.Nombre 
+        FROM Usuario
+        INNER JOIN Rol ON Usuario.RolId = Rol.Id
+        WHERE Rol.Nombre IN ('Empleado', 'Gerente')
+    """)
+    usuarios = cursor.fetchall()
+
+    if request.method == 'POST':
+        empleado_id = request.form['user_id']
+        empleado_nombre = request.form['user_name']
+        puntuacion = request.form['puntuacion']
+        comentarios = request.form['comentarios']
+
+        cursor.execute("""
+            INSERT INTO Evaluaciones (EmpleadoId, EmpleadoNombre, Puntuacion, Comentarios)
+            VALUES (?, ?, ?, ?)
+        """, (empleado_id, empleado_nombre, puntuacion, comentarios))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn.close()
+    return render_template('evaluar_desempeno.html', usuarios=usuarios)
+
+
+
+@app.route('/actualizar_evaluacion/<int:evaluacion_id>', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
+def actualizar_evaluacion(evaluacion_id):
+    if 'Administrador' not in session['user_roles'] and 'Gerente' not in session['user_roles']:
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM Evaluaciones WHERE Id = ?", (evaluacion_id,))
+    evaluacion = cursor.fetchone()
+
+    cursor.execute("""
+        SELECT Usuario.Id, Usuario.Nombre 
+        FROM Usuario
+        INNER JOIN Rol ON Usuario.RolId = Rol.Id
+        WHERE Rol.Nombre IN ('Empleado', 'Gerente')
+    """)
+    usuarios = cursor.fetchall()
+
+    if request.method == 'POST':
+        empleado_id = request.form['user_id']
+        empleado_nombre = request.form['user_name']
+        puntuacion = request.form['puntuacion']
+        comentarios = request.form['comentarios']
+
+        cursor.execute("""
+            UPDATE Evaluaciones
+            SET EmpleadoId = ?, EmpleadoNombre = ?, Puntuacion = ?, Comentarios = ?
+            WHERE Id = ?
+        """, (empleado_id, empleado_nombre, puntuacion, comentarios, evaluacion_id))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('mostrar_evaluaciones'))
+
+    conn.close()
+    return render_template('actualizar_evaluacion.html', evaluacion=evaluacion, usuarios=usuarios)
+
+
+
+
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
 
 @app.route('/ADT')
-@requiere_rol(['Gerente', 'Administrador'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def ADT():
     return render_template('adt_index.html')
 
 @app.route('/pre_ventas')
-@requiere_rol(['Empleado', 'Gerente', 'Administrador'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def pre_ventas():
     return render_template('pre_ventas.html')
 
 @app.route('/mantenimiento')
-@requiere_rol(['Tecnico', 'Administrador'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def mantenimiento():
     return render_template('mantenimiento.html')
 
 @app.route('/solicitar_vacaciones')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Empleado'])
 def solicitar_vacaciones():
     return render_template('solicitar_vacaciones.html')
 
 @app.route('/ver_solicitudes')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def ver_solicitudes():
     return render_template('ver_solicitudes.html')
 
 @app.route('/resultado_evaluacion')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def resultado_evaluacion():
     return render_template('resultado_evaluacion.html')
 
 @app.route('/consultar_ventas')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def consultar_ventas():
     return render_template('consultar_ventas.html')
 
 @app.route('/gestion_inventario')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_inventario():
     return render_template('gestion_inventario.html')
 
 @app.route('/gestion_proveedores')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_proveedores():
     return render_template('gestion_proveedores.html')
 
 @app.route('/gestion_promociones')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_promociones():
     return render_template('gestion_promociones.html')
 
 @app.route('/gestion_productos')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def gestion_productos():
     return render_template('gestion_productos.html')
 
 @app.route('/reportes_financieros')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def reportes_financieros():
     return render_template('reportes_financieros.html')
 
 @app.route('/cashier_functions')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def cashier_functions():
     return render_template('cashier_functions.html')
 
-@app.route('/admin_functions')
+@app.route('/admin_functions', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def admin_functions():
-    return render_template('admin_functions.html')
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    if request.method == 'POST':
+        nombre_metodo = request.form.get('payment_method')
+        descripcion = request.form.get('description', '')
+
+        if not nombre_metodo:
+            flash('El nombre del método de pago es obligatorio.', 'error')
+            return redirect(url_for('admin_functions'))
+
+        try:
+            cursor.execute(
+                """
+                INSERT INTO Metodos_Pago (nombre_metodo, descripcion, estado)
+                VALUES (?, ?, 'Activo')
+                """,
+                (nombre_metodo, descripcion)
+            )
+            connection.commit()
+            flash('Método de pago añadido correctamente.', 'success')
+        except Exception as e:
+            flash(f'Error al añadir el método de pago: {e}', 'error')
+        finally:
+            cursor.close()
+            connection.close()
+        return redirect(url_for('admin_functions'))
+
+    cursor.execute("SELECT metodo_id, nombre_metodo, descripcion, estado FROM Metodos_Pago")
+    metodos_pago = cursor.fetchall()
+    cursor.close()
+    connection.close()
+
+    return render_template('admin_functions.html', metodos_pago=metodos_pago)
+
+@app.route('/admin_functions_maintenance')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
+def admin_functions_maintenance():
+    return render_template('admin_functions_maintenance.html')
+
 
 @app.route('/configure_promotion')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def configure_promotion():
     return render_template('configure_promotion.html')
 
 @app.route('/technical_functions')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def technical_functions():
     # Obtener los parámetros actuales de la DB
     query = "SELECT pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion FROM Parametros_Mantenimiento WHERE id = 1"
@@ -166,6 +374,8 @@ def technical_functions():
 
 
 @app.route('/update_parameters', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def update_parameters():
     try:
         pressure_limit = request.form['pressure_limit']
@@ -199,6 +409,8 @@ def update_parameters():
 
 
 @app.route('/manual_check', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def manual_check():
     try:
 
@@ -219,6 +431,8 @@ def manual_check():
     return redirect(url_for('technical_functions'))
 
 @app.route('/get_parameters')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Tecnico'])
 def get_parameters():
     try:
         query = "SELECT pressure_limit, temperature_limit, fuel_level_limit, fecha_actualizacion FROM Parametros_Mantenimiento WHERE id = 1"
@@ -246,26 +460,23 @@ def get_parameters():
 
 
 @app.route('/actualizar_precio_producto')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def actualizar_precio_producto():
     return render_template('actualizar_precio_producto.html')
 
 @app.route('/generate_report')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def generate_report():
     return render_template('generate_report.html')
 
 @app.route('/configure_payment_method')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def configure_payment_method():
     return render_template('configure_payment_method.html')
 
-@app.route('/reabastecimiento')
-@requiere_rol(['Tecnico', 'Administrador'])
-def reabastecimiento():
-    return render_template('reabastecimiento.html')
-
-@app.route('/configurar_umbrales')
-@requiere_rol(['Administrador', 'Gerente', 'Tecnico'])
-def configurar_umbrales():
-    return render_template('configurar_umbrales.html')
 
 @app.route('/solicitud_reabastecimiento')
 @requiere_rol(['Administrador', 'Gerente', 'Tecnico'])
@@ -285,14 +496,60 @@ def registro_entregas():
 @app.route('/incidencias')
 @requiere_rol(['Administrador', 'Gerente', 'Tecnico'])
 def incidencias():
-    return render_template('incidencias.html')
+    return render_template('gestion_gasolina/incidencias.html')
 
 @app.route('/gestion_servicios')
-@requiere_rol(['Empleado', 'Gerente', 'Administrador'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def gestion_servicios():
     return render_template('gestion_servicios.html')
 
+@app.route('/nomina')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
+def generar_reporte_nomina_pdf():
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    pdf.setTitle("Reporte de Nómina")
+
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    pdf.drawString(100, 800, "Reporte de Nómina - Servicentro Corazón de Jesús")
+    pdf.drawString(100, 780, f"Fecha de Generación: {fecha_generacion}")
+
+ 
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+    SELECT empleado_id, nombre, salario_base, salario_base * 0.055 AS aporte_ccss, 
+           salario_base - (salario_base * 0.055) AS salario_neto
+    FROM Empleados
+    """)
+    empleados = cursor.fetchall()
+
+    y = 750
+    for empleado in empleados:
+        empleado_id = empleado[0] 
+        nombre = empleado[1]  
+        salario_base = empleado[2]  
+        aporte_ccss = empleado[3]  
+        salario_neto = empleado[4]  
+
+    pdf.drawString(100, y, f"Empleado ID: {empleado_id}, Nombre: {nombre}, "
+                           f"Salario Base: ₡{salario_base}, Aporte a CCSS: ₡{aporte_ccss}, "
+                           f"Salario Neto: ₡{salario_neto}")
+    y -= 20
+
+
+    pdf.showPage()
+    pdf.save()
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name="reporte_nomina.pdf", mimetype='application/pdf')
+
+
 @app.route('/process_sale', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def process_sale():
     product_code = request.form['product_code']
     quantity = int(request.form['quantity'])
@@ -333,6 +590,8 @@ def process_sale():
     return redirect(url_for('consultar_ventas'))
 
 @app.route('/consultar_servicios')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def consultar_servicios():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -354,6 +613,8 @@ def consultar_servicios():
 
 
 @app.route('/registrar_servicio', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def registrar_servicio():
     if request.method == 'POST':
         tipo_servicio = request.form['tipo_servicio']
@@ -375,6 +636,8 @@ def registrar_servicio():
 
 
 @app.route('/editar_servicio/<int:servicio_id>', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def editar_servicio(servicio_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -394,6 +657,8 @@ def editar_servicio(servicio_id):
     return render_template('editar_servicio.html', servicio=servicio)
 
 @app.route('/eliminar_servicio/<int:servicio_id>', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def eliminar_servicio(servicio_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -520,13 +785,15 @@ def editar_promocion(id):
     return render_template('editar_promocion.html', promocion=promocion[0])
 
 @app.route('/eliminar_promocion/<int:id>')
-@requiere_rol(['Administrador', 'Gerente'])
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def eliminar_promocion(id):
     execute_query("DELETE FROM Promociones WHERE id = ?", (id,))
     flash('Promoción eliminada con éxito', 'success')
     return redirect(url_for('listar_promociones'))
 
 @app.route('/registro_proveedor', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def registro_proveedor():
     if request.method == 'POST':
         nombre_proveedor = request.form['nombre_proveedor']
@@ -543,11 +810,15 @@ def registro_proveedor():
     return render_template('registro_proveedor.html')
 
 @app.route('/listar_proveedores')
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente', 'Empleado'])
 def listar_proveedores():
     proveedores = execute_query('SELECT * FROM proveedores', fetch=True)
     return render_template('listar_proveedores.html', proveedores=proveedores)
 
 @app.route('/editar_proveedor/<int:id>', methods=['GET', 'POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def editar_proveedor(id):
     proveedor = execute_query('SELECT * FROM proveedores WHERE id = ?', (id,), fetch=True)
     if not proveedor:
@@ -568,6 +839,8 @@ def editar_proveedor(id):
     return render_template('editar_proveedor.html', proveedor=proveedor[0])
 
 @app.route('/eliminar_proveedor/<int:id>', methods=['POST'])
+@requiere_autenticacion
+@requiere_rol(['Administrador', 'Gerente'])
 def eliminar_proveedor(id):
     proveedor = execute_query('SELECT * FROM proveedores WHERE id = ?', (id,), fetch=True)
     if not proveedor:
@@ -591,24 +864,19 @@ def autenticacion():
         elif not check_password_hash(user[0][2], password):
             flash('La contraseña es incorrecta', 'danger')
         else:
-            session['usuario_id'] = user[0][0]
-            session['user_roles'] = obtener_roles(user[0][0])
-            session['rol'] = session['user_roles'][0] if session['user_roles'] else None
-            flash(f'Roles asignados: {session["user_roles"]}', 'success')  # Verifica los roles asignados
+            session['usuario_id'] = user[0][0]  
+            session['user_roles'] = obtener_roles(user[0][0])          
             flash('Inicio de sesión exitoso', 'success')
             return redirect(url_for('home'))
-
+        
         return redirect(url_for('autenticacion'))
 
     return render_template('autenticacion.html')
-
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        email = request.form['email']
         password = request.form['password']
 
         user = execute_query('SELECT * FROM Usuarios WHERE nombre_usuario = ?', (username,))
@@ -619,15 +887,20 @@ def register():
         hashed_password = generate_password_hash(password)
 
         try:
-            execute_query('''INSERT INTO Usuarios (nombre_usuario, contrasena, rol, estatus)
-                              VALUES (?, ?, 'Administrador', 'Activo')''', (username, hashed_password))
-            flash('Usuario registrado exitosamente', 'success')
+            execute_query('''
+                INSERT INTO Usuarios (nombre_usuario, contrasena, rol, fecha_creacion, estatus)
+                VALUES (?, ?, 'Pendiente', GETDATE(), 'Inactivo')
+            ''', (username, hashed_password))
+
+            flash('Usuario registrado exitosamente. ', 'success')
             return redirect(url_for('autenticacion'))
+
         except Exception as e:
             flash(f'Error al registrar el usuario: {str(e)}', 'danger')
             return redirect(url_for('register'))
 
     return render_template('register.html')
+
 
 @app.route('/reset_password')
 def reset_password():
@@ -663,7 +936,6 @@ def listar_devoluciones():
     return render_template('listar_devoluciones.html', devoluciones=devoluciones)
 
 @app.route('/EMP')
-@requiere_rol(['Empleado', 'Gerente', 'Administrador'])
 def EMP():
     if 'usuario_id' not in session:
         return redirect(url_for('autenticacion'))
@@ -817,14 +1089,12 @@ def programar_cita():
         cliente_telefono = request.form['cliente_telefono']
         cliente_email = request.form['cliente_email']
 
-        # Convertir la fecha desde el formato string a datetime
         try:
             fecha_servicio = datetime.strptime(fecha_servicio_str, '%Y-%m-%dT%H:%M')
         except ValueError:
             flash("La fecha proporcionada no es válida. Intente nuevamente.", 'error')
             return redirect(url_for('programar_cita'))
 
-        # Verificar disponibilidad
         cursor.execute("""
             SELECT COUNT(*) 
             FROM Citas 
@@ -836,7 +1106,6 @@ def programar_cita():
             flash('Ya existe una cita programada para ese horario.', 'error')
             return redirect(url_for('programar_cita'))
 
-        # Registrar cita con los datos del cliente
         cursor.execute("""
             INSERT INTO Citas (tipo_servicio, descripcion, fecha_servicio, cliente_nombre, cliente_telefono, cliente_email) 
             VALUES (?, ?, ?, ?, ?, ?);
@@ -855,7 +1124,6 @@ def consultar_citas():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Obtener todas las citas programadas
     cursor.execute("""
         SELECT cita_id, tipo_servicio, descripcion, fecha_servicio, estado, cliente_nombre, cliente_telefono, cliente_email
         FROM Citas
@@ -868,10 +1136,307 @@ def consultar_citas():
 
     return render_template('consultar_citas.html', citas=citas)
 
-@app.route('/calcular_nomina')
-def calcular_nomina():
-    return render_template('calcular_nomina.html')
+@app.route('/gestion_gasolina')
+def gestion_gasolina():
+    return render_template('gestion_gasolina/gestion_gasolina.html')
 
+@app.route('/venta_gasolina', methods=['GET', 'POST'])
+def venta_gasolina():
+    if request.method == 'GET':
+        return render_template('gestion_gasolina/venta_gasolina.html')
+    elif request.method == 'POST':
+        tipo_gasolina = request.form['tipo_gasolina']
+        litros_vendidos = float(request.form['litros_vendidos'])
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE gasolina
+            SET cantidad_litros = cantidad_litros - ?
+            WHERE tipo = ?
+        """, litros_vendidos, tipo_gasolina)
+        
+        cursor.execute("SELECT cantidad_litros, minimo_litros FROM gasolina WHERE tipo = ?", tipo_gasolina)
+        gasolina = cursor.fetchone()
+        
+        if gasolina and gasolina[0] <= gasolina[1]:
+            enviar_alerta_correo(tipo_gasolina, "destinario.servicentrocj@gmail.com")
+
+        conn.commit()
+        conn.close()
+        return redirect('/venta_gasolina')
+
+@app.route('/reabastecer', methods=['GET', 'POST'])
+def reabastecer():
+    if request.method == 'GET':
+        return render_template('gestion_gasolina/reabastecer.html')
+    elif request.method == 'POST':
+        tipo_gasolina = request.form['tipo_gasolina']
+        cantidad = float(request.form['cantidad'])
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT gasolina_id FROM gasolina WHERE tipo = ?", tipo_gasolina)
+        gasolina_id = cursor.fetchone()[0]
+
+        fecha_actual = datetime.now()
+        cursor.execute("""
+            INSERT INTO reabastecimiento (gasolina_id, cantidad, fecha_solicitud)
+            VALUES (?, ?, ?)
+        """, gasolina_id, cantidad, fecha_actual)
+
+        cursor.execute("""
+            UPDATE gasolina
+            SET cantidad_litros = cantidad_litros + ?
+            WHERE tipo = ?
+        """, cantidad, tipo_gasolina)
+
+        conn.commit()
+        conn.close()
+        return redirect('/reabastecer')
+
+@app.route('/alertas', methods=['GET', 'POST'])
+def alertas():
+    if request.method == 'POST':
+        tipo_gasolina = request.form['tipo_gasolina']
+        enviar_alerta_correo(tipo_gasolina, "destinario.servicentrocj@gmail.com" )
+        return redirect('/alertas') 
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT tipo, cantidad_litros, minimo_litros
+        FROM gasolina
+        WHERE cantidad_litros <= minimo_litros
+    """)
+    alertas = [{"tipo": row[0], "cantidad_litros": row[1], "minimo_litros": row[2]} for row in cursor.fetchall()]
+    conn.close()
+
+    return render_template('gestion_gasolina/alertas.html', alertas=alertas)
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
+    remitente = "remitente.servicentrocj@gmail.com"
+    password = "wrcf yejw zkqv wqsb"
+    destinatario = correo_proveedor
+
+    asunto = "Alerta: Solicitud de reabastecimiento"
+    cuerpo = f"""
+    Estimado proveedor,
+
+    El nivel de gasolina para el tipo '{tipo_gasolina}' ha llegado al mínimo establecido.
+    Por favor, procese un reabastecimiento lo antes posible.
+
+    Saludos,
+    Gestión de Gasolinera
+    """
+
+    mensaje = MIMEMultipart()
+    mensaje['From'] = remitente
+    mensaje['To'] = destinatario
+    mensaje['Subject'] = asunto
+    mensaje.attach(MIMEText(cuerpo, 'plain'))
+
+    try:
+        servidor = smtplib.SMTP('smtp.gmail.com', 587)
+        servidor.starttls()
+        servidor.login(remitente, password)
+        servidor.send_message(mensaje)
+        servidor.quit()
+        print("Correo enviado exitosamente")
+    except Exception as e:
+        print(f"Error enviando el correo: {e}")
+
+incidencias = []
+
+@app.route('/')
+def index():
+    return render_template('gestion_gasolina/incidencias.html', incidencias=incidencias)
+
+@app.route('/registrar_incidencia', methods=['POST'])
+def registrar_incidencia():
+    try:
+        tipo_incidencia = request.form['tipo_incidencia']
+        descripcion = request.form['descripcion']
+        incidencias.append({
+            'tipo': tipo_incidencia,
+            'descripcion': descripcion,
+            'fecha': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        print("Incidencias actuales:", incidencias)  
+        return render_template('gestion_gasolina/incidencias.html', incidencias=incidencias)
+    except Exception as e:
+        print(f"Error al registrar incidencia: {e}")
+        return render_template('gestion_gasolina/incidencias.html', incidencias=incidencias)
+    
+@app.route('/generar_reporte_incidencias')
+def generar_reporte():
+    buffer = io.BytesIO()
+
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, height - 50, "Reporte de Incidencias")
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(50, height - 80, f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    y = height - 120
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(50, y, "Tipo de Incidencia")
+    pdf.drawString(200, y, "Descripción")
+    pdf.drawString(400, y, "Fecha")
+
+    pdf.setFont("Helvetica", 10)
+    for incidencia in incidencias:
+        y -= 20
+        if y < 50:  
+            pdf.showPage()
+            pdf.setFont("Helvetica", 10)
+            y = height - 50
+        pdf.drawString(50, y, incidencia['tipo'])
+        pdf.drawString(200, y, incidencia['descripcion'][:50])  
+        pdf.drawString(400, y, incidencia['fecha'])
+
+    pdf.save()
+    buffer.seek(0)
+
+    response = make_response(buffer.read())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=reporte_incidencias.pdf'
+    return response
+
+def enviar_alerta_correo(tipo_gasolina, correo_proveedor):
+    remitente = "remitente.servicentrocj@gmail.com"
+    password = "wrcf yejw zkqv wqsb"
+    destinatario = correo_proveedor
+
+    asunto = "Alerta: Solicitud de reabastecimiento"
+    cuerpo = f"""
+    Estimado proveedor,
+
+    El nivel de gasolina para el tipo '{tipo_gasolina}' ha llegado al mínimo establecido.
+    Por favor, procese un reabastecimiento lo antes posible.
+
+    Saludos,
+    Gestión de Gasolinera
+    """
+
+    mensaje = MIMEMultipart()
+    mensaje['From'] = remitente
+    mensaje['To'] = destinatario
+    mensaje['Subject'] = asunto
+    mensaje.attach(MIMEText(cuerpo, 'plain'))
+
+    try:
+        servidor = smtplib.SMTP('smtp.gmail.com', 587)
+        servidor.starttls()
+        servidor.login(remitente, password)
+        servidor.send_message(mensaje)
+        servidor.quit()
+        print("Correo enviado exitosamente")
+    except Exception as e:
+        print(f"Error enviando el correo: {e}")
+
+#Configurar umbrales gasolina
+@app.route('/configurar_umbrales', methods=['GET', 'POST'])
+def configurar_umbrales():
+    if request.method == 'POST':
+        tipo = request.form['tipo']
+        minimo_litros = int(request.form['minimo_litros'])
+        maximo_litros = int(request.form['maximo_litros'])
+
+        # Validaciones
+        if minimo_litros < 1000 or minimo_litros > 5000:
+            flash("El mínimo de litros debe estar entre 1000 y 5000.", "danger")
+            return redirect(url_for('configurar_umbrales'))
+        if maximo_litros < 8000 or maximo_litros > 10000:
+            flash("El máximo de litros debe estar entre 8000 y 10000.", "danger")
+            return redirect(url_for('configurar_umbrales'))
+
+        try:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                query = """
+                    UPDATE dbo.gasolina 
+                    SET minimo_litros = ?, maximo_litros = ? 
+                    WHERE tipo = ?
+                """
+                cursor.execute(query, (minimo_litros, maximo_litros, tipo))
+                conn.commit()
+                flash("Umbrales configurados correctamente.", "success")
+        except Exception as e:
+            flash(f"Error al actualizar los umbrales: {e}", "danger")
+        
+        return redirect(url_for('configurar_umbrales'))
+    
+    return render_template('gestion_gasolina/configurar_umbrales.html')
+
+#Vacaciones
+@app.route('/vacaciones', methods=['GET', 'POST'])
+@requiere_autenticacion
+def vacaciones():
+    usuario_id = session.get('usuario_id')  
+    usuario = execute_query("SELECT rol FROM Usuarios WHERE usuario_id = ?", (usuario_id,))
+    if not usuario or usuario[0][0] != 'Empleado':
+        flash("Error: El usuario no tiene el rol de 'Empleado'.", "danger")
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        fecha_inicio = request.form['fecha_inicio']
+        fecha_fin = request.form['fecha_fin']
+        
+        insertar_solicitud_vacaciones(usuario_id, fecha_inicio, fecha_fin)
+        flash('Solicitud de vacaciones enviada correctamente.', 'success')
+        return redirect(url_for('vacaciones'))
+
+    solicitudes = obtener_solicitudes_vacaciones(f"empleado_id = {usuario_id}")
+    return render_template('vacaciones.html', solicitudes=solicitudes)
+
+@app.route('/gestionar_vacaciones', methods=['GET', 'POST'])
+@requiere_autenticacion
+def gestionar_vacaciones():
+    if not any(rol in ['Gerente', 'Administrador'] for rol in obtener_roles(session['usuario_id'])):
+      flash('No tienes permisos para acceder a esta página.', 'danger')
+      return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        solicitud_id = request.form['solicitud_id']
+        estatus = request.form['estatus']
+        comentario = request.form['comentario']
+        actualizar_estado_solicitud(solicitud_id, estatus, comentario)
+        flash('Solicitud actualizada correctamente.', 'success')
+
+    solicitudes = obtener_solicitudes_vacaciones()
+    return render_template('gestionar_vacaciones.html', solicitudes=solicitudes)
+
+def obtener_solicitudes_vacaciones(filtro=None):
+    query = "SELECT solicitud_id, empleado_id, fecha_inicio, fecha_fin, estatus, fecha_solicitud, comentario FROM Solicitudes_Vacaciones"
+    params = ()  
+    solicitudes = execute_query(query, params)
+    if solicitudes is None:
+        return []
+    return solicitudes
+
+def insertar_solicitud_vacaciones(usuario_id, fecha_inicio, fecha_fin):
+    query = """
+        INSERT INTO Solicitudes_Vacaciones (empleado_id, fecha_inicio, fecha_fin)
+        VALUES (?, ?, ?)
+    """
+    return execute_query(query, (usuario_id, fecha_inicio, fecha_fin), fetch=False)
+
+def actualizar_estado_solicitud(solicitud_id, estatus, comentario=''):
+    query = """
+        UPDATE Solicitudes_Vacaciones 
+        SET estatus = ?, comentario = ? 
+        WHERE solicitud_id = ?
+    """
+    return execute_query(query, (estatus, comentario, solicitud_id), fetch=False)
 
 if __name__ == '__main__':
     app.run(debug=True)

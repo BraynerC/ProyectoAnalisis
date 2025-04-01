@@ -8,7 +8,9 @@
         <p>Seleccione una opción para gestionar los proveedores:</p>
 
         <div class="btn-group-vertical" role="group" aria-label="Gestión de Proveedores">
+            {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
             <a href="{{ url_for('registro_proveedor') }}" class="btn btn-green">Registrar Nuevo Proveedor</a>
+            {% endif %}
             <a href="{{ url_for('listar_proveedores') }}" class="btn btn-yellow">Listar Proveedores</a>
         </div>
 

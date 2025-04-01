@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        {% if session.get('rol') in ['Gerente', 'Administrador'] %}
+        {% if 'Administrador' in session['user_roles'] or 'Gerente' in session['user_roles'] %}
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body text-center">

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Reabastecimiento de Gasolina{% endblock %}
+{% set show_navigation = true %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4">Reabastecimiento de Gasolina</h2>
+    <form method="POST" action="{{ url_for('reabastecer') }}" id="reabastecimientoForm">
+        <!-- Selección del Tipo de Gasolina -->
+        <div class="form-group">
+            <label for="tipo_gasolina">Tipo de Gasolina:</label>
+            <select name="tipo_gasolina" id="tipo_gasolina" class="form-control" required>
+                <option value="Gasolina Super">Gasolina Super</option>
+                <option value="Gasolina Regular">Gasolina Regular</option>
+                <option value="Diesel">Diesel</option>
+            </select>
+        </div>
+
+        <!-- Cantidad a Reabastecer -->
+        <div class="form-group">
+            <label for="cantidad">Cantidad a Reabastecer:</label>
+            <input type="number" name="cantidad" id="cantidad" class="form-control" placeholder="Ingrese la cantidad a reabastecer" required>
+        </div>
+
+        <!-- Lista de Control de Calidad -->
+        <h4 class="mt-4">Control de Calidad</h4>
+        <p>Por favor, marque los criterios que NO cumplen:</p>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="densidad" name="criterios_no_cumplen" value="Densidad">
+            <label class="form-check-label" for="densidad">Prueba de Densidad / Gravedad</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="agua" name="criterios_no_cumplen" value="Agua y Sedimentos">
+            <label class="form-check-label" for="agua">Prueba de Agua y Sedimentos</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="aspecto" name="criterios_no_cumplen" value="Aspecto y Color">
+            <label class="form-check-label" for="aspecto">Aspecto y Color</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="temperatura" name="criterios_no_cumplen" value="Temperatura">
+            <label class="form-check-label" for="temperatura">Temperatura</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="documento" name="criterios_no_cumplen" value="Documento de Calidad">
+            <label class="form-check-label" for="documento">Documento de Calidad</label>
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-4">
+            <button type="submit" class="btn btn-orange" id="submitButton">Registrar Reabastecimiento</button>
+            <a href="{{ url_for('gestion_gasolina') }}" class="btn btn-secondary ml-3">Volver a Gestión</a>
+        </div>
+    </form>
+</div>
+
+<!-- Script para Control de Calidad -->
+<script>
+document.getElementById('reabastecimientoForm').addEventListener('submit', function(event) {
+    // Obtener todas las casillas de verificación
+    const checkboxes = document.querySelectorAll('input[name="criterios_no_cumplen"]:checked');
+    if (checkboxes.length >= 2) {
+        // Si hay 2 o más criterios que no cumplen, rechazar el reabastecimiento
+        alert("Reabastecimiento rechazado: Hay al menos 2 criterios de calidad que no cumplen.");
+        event.preventDefault(); // Evita el envío del formulario
+    }
+});
+</script>
+{% endblock %}
