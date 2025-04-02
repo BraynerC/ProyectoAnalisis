@@ -855,24 +855,31 @@ def eliminar_proveedor(id):
 
 @app.route('/autenticacion', methods=['GET', 'POST'])
 def autenticacion():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    try:
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
 
-        user = execute_query('SELECT * FROM Usuarios WHERE nombre_usuario = ?', (username,))
-        if user is None:
-            flash('El nombre de usuario no existe', 'danger')
-        elif not check_password_hash(user[0][2], password):
-            flash('La contraseña es incorrecta', 'danger')
-        else:
-            session['usuario_id'] = user[0][0]  
-            session['user_roles'] = obtener_roles(user[0][0])          
-            flash('Inicio de sesión exitoso', 'success')
-            return redirect(url_for('home'))
-        
+            user = execute_query('SELECT * FROM Usuarios WHERE nombre_usuario = ?', (username,))
+            
+            if user is None:
+                flash('El nombre de usuario no existe', 'danger')
+            elif not check_password_hash(user[0][2], password):
+                flash('La contraseña es incorrecta', 'danger')
+            else:
+                session['usuario_id'] = user[0][0]  
+                session['user_roles'] = obtener_roles(user[0][0])          
+                flash('Inicio de sesión exitoso', 'success')
+                return redirect(url_for('home'))
+            
+            return redirect(url_for('autenticacion'))
+
+        return render_template('autenticacion.html')
+
+    except Exception as e:
+        print(f"Error durante autenticación: {str(e)}")
+        flash('Ocurrió un error durante el login', 'danger')
         return redirect(url_for('autenticacion'))
-
-    return render_template('autenticacion.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
