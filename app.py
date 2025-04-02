@@ -1443,4 +1443,4 @@ def actualizar_estado_solicitud(solicitud_id, estatus, comentario=''):
     return execute_query(query, (estatus, comentario, solicitud_id), fetch=False)
 
 if __name__ == '__app__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
