@@ -1442,5 +1442,5 @@ def actualizar_estado_solicitud(solicitud_id, estatus, comentario=''):
     """
     return execute_query(query, (estatus, comentario, solicitud_id), fetch=False)
 
-if __name__ == '__main__':
+if __name__ == '__app__':
     app.run(debug=True)
