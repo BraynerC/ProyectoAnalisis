@@ -18,14 +18,11 @@ app.secret_key = 'Hola'
 
 def get_db_connection():
     return pyodbc.connect(
-        #'DRIVER={ODBC Driver 17 for SQL Server};'
-        #'SERVER=localhost\\SQLEXPRESS;'
-        #'DATABASE=ServicentroCorazonDB;'
-        #'Trusted_Connection=yes;'
-        'Server=186.32.3.98,1533;'
-        'Database=ServicentroCorazonDB;'
-        'User=Fidelitas;'
-        'Password=F1d3l1tas;'
+        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'SERVER=186.32.3.98,1533;'
+        'DATABASE=ServicentroCorazonDB;'
+        'UID=Fidelitas;'  
+        'PWD=F1d3l1tas;' 
     )
 
 def execute_query(query, params=(), fetch=True):
